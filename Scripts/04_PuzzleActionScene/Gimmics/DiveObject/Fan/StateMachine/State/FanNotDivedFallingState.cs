@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TettekeKobo.GhostDivePuzzle
 {
     /// <summary>
-    /// 
+    /// FanNotDivedFallingState
     /// </summary>
     public class FanNotDivedFallingState : IHamuState
     {
@@ -13,34 +13,36 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<FanStateType> transitionState;
         /// <summary>
-        /// 扇風機のコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly FanObjectComponentController fanObjectComponent;
-        
+        private readonly FanObjectComponentController componentController;
+
         /// <summary>
         /// コンストラクター
         /// </summary>
         public FanNotDivedFallingState(ITransitionState<FanStateType> ts, FanObjectComponentController focc)
         {
             transitionState = ts;
-            fanObjectComponent = focc;
+            componentController = focc;
         }
-        
+
         public void Enter()
         {
             //下方向のみ物理演算で動けるようにする
-            fanObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
-            var constraints2D = fanObjectComponent.Rigidbody2D.constraints;
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            var constraints2D = componentController.Rigidbody2D.constraints;
             constraints2D |= RigidbodyConstraints2D.FreezePositionX;
             constraints2D |= RigidbodyConstraints2D.FreezeRotation;
             constraints2D &= ~RigidbodyConstraints2D.FreezePositionY;
-            fanObjectComponent.Rigidbody2D.constraints = constraints2D;
+            componentController.Rigidbody2D.constraints = constraints2D;
+            //一旦重力をオフにする
+            componentController.Rigidbody2D.gravityScale = 0;
         }
 
         public void MyUpdate()
         {
             //下にプレイヤーにいるかチェックする
-            var onPlayer = fanObjectComponent.Rigidbody2D.IsTouching(fanObjectComponent.PlayerContactFilter2D);
+            var onPlayer = componentController.Rigidbody2D.IsTouching(componentController.PlayerContactFilter2D);
             if (onPlayer)
             {
                 var playerStateBehaviour = Object.FindObjectOfType<PlayerStateBehaviour>();
@@ -51,20 +53,21 @@ namespace TettekeKobo.GhostDivePuzzle
             }
 
             //下にオブジェクトや地面がないかチェックする
-            var onGround = fanObjectComponent.Rigidbody2D.IsTouching(fanObjectComponent.GroundContactFilter2D);
-            var onObject = fanObjectComponent.Rigidbody2D.IsTouching(fanObjectComponent.ObjectContactFilter2D);
+            var onGround = componentController.Rigidbody2D.IsTouching(componentController.GroundContactFilter2D);
+            var onObject = componentController.Rigidbody2D.IsTouching(componentController.ObjectContactFilter2D);
             if(onGround || onObject) transitionState.TransitionState(FanStateType.NonDivedIdling);
         }
 
         public void MyFixedUpdate()
         {
-            //下に落下させる
-            fanObjectComponent.Rigidbody2D.velocity = Vector2.down * 5f;
+            componentController.Rigidbody2D.velocity = Vector2.down * 10f;
         }
 
         public void Exit()
         {
-            fanObjectComponent.Rigidbody2D.velocity = Vector2.zero;
+            componentController.Rigidbody2D.velocity = Vector2.zero;
+            //重力を元に戻す
+            componentController.Rigidbody2D.gravityScale = 1;
         }
     }
 }

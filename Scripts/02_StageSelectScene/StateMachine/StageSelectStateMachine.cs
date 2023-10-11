@@ -1,7 +1,7 @@
 using System;
-using System.Threading;
 using TettekeKobo.StateMachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TettekeKobo.GhostDivePuzzle
 {
@@ -27,10 +27,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <summary>
         /// コンストラクター
         /// </summary>
-        public StageSelectStateMachine(TilesManager tilesManager, StageSelectPlayerManager selectPlayerManager)
+        public StageSelectStateMachine(Text nameText,　TilesManager tilesManager, StageSelectPlayerManager selectPlayerManager)
         {
-            stageCreatingState = new StageCreatingState(this, tilesManager, selectPlayerManager);
-            stageSelectingState = new StageSelectingState(this, tilesManager, selectPlayerManager);
+            stageCreatingState = new StageCreatingState(this, nameText, tilesManager, selectPlayerManager);
+            stageSelectingState = new StageSelectingState(this, nameText, tilesManager, selectPlayerManager);
             beforeTalkSceneLoadingState = new BeforeTalkSceneLoadingState(tilesManager);
         }
         

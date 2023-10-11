@@ -1,4 +1,5 @@
 using System;
+using naichilab.EasySoundPlayer.Scripts;
 using UniRx;
 using UnityEngine;
 
@@ -46,6 +47,7 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Activate()
         {
+            SePlayer.Instance.Play("SE_SolvePuzzle");
             isActive = true;
             animator.SetBool("IsActive", true);
         }

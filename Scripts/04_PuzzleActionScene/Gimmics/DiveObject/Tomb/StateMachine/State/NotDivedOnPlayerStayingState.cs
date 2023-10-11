@@ -37,9 +37,11 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
+            tombObjectComponent.Rigidbody2D.simulated = false;
+            
             //Dynamicだとうまく下にいるプレイヤーに追従しないため、Kinematicにする
             //プレイヤーに密接させたいため下方向に速度をかける
-            tombObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            tombObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
             tombObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 
             //プレイヤーに追従させるため、自身をPlayerの子オブジェクトに設定する
@@ -80,6 +82,7 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void Exit()
         {
+            tombObjectComponent.Rigidbody2D.simulated = true;
             //親を元に戻してあげる
             //プレイヤーがダイブ終了した時点も子オブジェクトになっているため、ダイブ終了後もプレイヤーの頭上にオハカが乗ってしまうため位置を補正してあげる
             var playerComponentController = playerStateBehaviour.GetComponent<PlayerComponentController>();

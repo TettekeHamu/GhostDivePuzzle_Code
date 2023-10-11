@@ -17,7 +17,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <summary>
         /// ポーズモードに変更を行うキー
         /// </summary>
-        private bool changePauseModeKey;
+        //private bool changePauseModeKey;
         /// <summary>
         /// 移動に使うキー
         /// </summary>
@@ -33,7 +33,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <summary>
         /// カメラを切り替える時に使うキー
         /// </summary>
-        private bool changeCameraKey;
+        //private bool changeCameraKey;
         /// <summary>
         /// ダイブを開始させるキー
         /// </summary>
@@ -51,11 +51,11 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private bool retryKey;
 
-        public bool ChangePauseModeKey => changePauseModeKey;
+        //public bool ChangePauseModeKey => changePauseModeKey;
         public Vector2 MoveAxisKey => moveAxisKey;
         public bool JumpKey => jumpKey;
         public bool JumpingUpKey => jumpingUpKey;
-        public bool ChangeCameraKey => changeCameraKey;
+       // public bool ChangeCameraKey => changeCameraKey;
         public bool StartDiveKey => startDiveKey;
         public bool StopDiveKey => stopDiveKey;
         public bool ActionDiveAbility => actionDiveAbility;
@@ -87,13 +87,13 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private void Update()
         {
-            changePauseModeKey = playerInput.actions["ChangePauseMode"].WasPressedThisFrame();
+            //changePauseModeKey = playerInput.actions["ChangePauseMode"].WasPressedThisFrame();
             moveAxisKey = playerInput.actions["MovePlayer"].ReadValue<Vector2>();
             jumpKey = playerInput.actions["JumpPlayer"].WasPressedThisFrame();
             jumpingUpKey = playerInput.actions["JumpPlayer"].IsPressed();
-            changeCameraKey = playerInput.actions["ChangeCamera"].WasPressedThisFrame();
-            startDiveKey = playerInput.actions["StartDive"].IsPressed();
-            stopDiveKey = playerInput.actions["StopDive"].IsPressed();
+            //changeCameraKey = playerInput.actions["ChangeCamera"].WasPressedThisFrame();
+            startDiveKey = playerInput.actions["StartDive"].WasPressedThisFrame();
+            stopDiveKey = playerInput.actions["StopDive"].WasPressedThisFrame();
             actionDiveAbility = playerInput.actions["ActionDiveAbility"].WasPressedThisFrame();
             retryKey = playerInput.actions["RetryGame"].WasPressedThisFrame();
         }

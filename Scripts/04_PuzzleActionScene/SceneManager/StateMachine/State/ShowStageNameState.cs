@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 
 namespace TettekeKobo.GhostDivePuzzle

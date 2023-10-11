@@ -23,6 +23,7 @@ namespace TettekeKobo.GhostDivePuzzle
         public int ClearStageNumber => clearStageNumber;
         public int RecentClearStageNumber => recentClearStageNumber;
         public bool IsShowNewStage => isShowNewStage;
+        
 
         /// <summary>
         /// クリアしたステージの最大数を設定する処理（ゲーム起動時に呼びだす）
@@ -42,16 +43,6 @@ namespace TettekeKobo.GhostDivePuzzle
         public void UpdateRecentClearStageNumber(int number)
         {
             recentClearStageNumber = number;
-            //今までのクリアしたステージ数よりも大きかった場合最大値も更新
-            if (recentClearStageNumber > clearStageNumber)
-            {
-                clearStageNumber = recentClearStageNumber;
-                isShowNewStage = true;
-            }
-            else
-            {
-                isShowNewStage = false;
-            }
         }
     }
 }

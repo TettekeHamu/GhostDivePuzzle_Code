@@ -1,3 +1,4 @@
+using UniRx;
 using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -22,6 +23,9 @@ namespace TettekeKobo.GhostDivePuzzle
             foreach (var enemy in enemyBards)
             {
                 enemy.Initialize();
+                enemy.OnDestroyObservable
+                    .Subscribe(_ => ReSearchEnemy())
+                    .AddTo(this);
             }
         }
 
@@ -39,6 +43,9 @@ namespace TettekeKobo.GhostDivePuzzle
             foreach (var enemy in enemyEyes)
             {
                 enemy.Initialize();
+                enemy.OnDestroyObservable
+                    .Subscribe(_ => ReSearchEnemy())
+                    .AddTo(this);
             }
         }
 
@@ -48,6 +55,16 @@ namespace TettekeKobo.GhostDivePuzzle
             {
                 enemy.MyUpDate();
             }
+        }
+
+        /// <summary>
+        /// 敵が死んだ際に配列を更新するメソッド
+        /// </summary>
+        private void ReSearchEnemy()
+        {
+            //Debug.Log("敵の配列を更新します");
+            enemyBards = FindObjectsOfType<EnemyBardManager>();
+            enemyEyes = FindObjectsOfType<EnemyEyeManager>();
         }
         
         /// <summary>

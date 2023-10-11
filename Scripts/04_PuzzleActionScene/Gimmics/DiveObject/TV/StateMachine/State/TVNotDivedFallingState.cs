@@ -13,34 +13,36 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<TVStateType> transitionState;
         /// <summary>
-        /// TVオブジェクトのコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly TVObjectComponentController tvObjectComponent;
-        
+        private readonly TVObjectComponentController componentController;
+
         /// <summary>
         /// コンストラクター
         /// </summary>
-        public TVNotDivedFallingState(ITransitionState<TVStateType> ts, TVObjectComponentController tvocc)
+        public TVNotDivedFallingState(ITransitionState<TVStateType> ts, TVObjectComponentController tocc)
         {
             transitionState = ts;
-            tvObjectComponent = tvocc;
+            componentController = tocc;
         }
-        
+
         public void Enter()
         {
             //下方向のみ物理演算で動けるようにする
-            tvObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
-            var constraints2D = tvObjectComponent.Rigidbody2D.constraints;
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            var constraints2D = componentController.Rigidbody2D.constraints;
             constraints2D |= RigidbodyConstraints2D.FreezePositionX;
             constraints2D |= RigidbodyConstraints2D.FreezeRotation;
             constraints2D &= ~RigidbodyConstraints2D.FreezePositionY;
-            tvObjectComponent.Rigidbody2D.constraints = constraints2D;
+            componentController.Rigidbody2D.constraints = constraints2D;
+            //一旦重力をオフにする
+            componentController.Rigidbody2D.gravityScale = 0;
         }
 
         public void MyUpdate()
         {
             //下にプレイヤーにいるかチェックする
-            var onPlayer = tvObjectComponent.Rigidbody2D.IsTouching(tvObjectComponent.PlayerContactFilter2D);
+            var onPlayer = componentController.Rigidbody2D.IsTouching(componentController.PlayerContactFilter2D);
             if (onPlayer)
             {
                 var playerStateBehaviour = Object.FindObjectOfType<PlayerStateBehaviour>();
@@ -51,20 +53,21 @@ namespace TettekeKobo.GhostDivePuzzle
             }
 
             //下にオブジェクトや地面がないかチェックする
-            var onGround = tvObjectComponent.Rigidbody2D.IsTouching(tvObjectComponent.GroundContactFilter2D);
-            var onObject = tvObjectComponent.Rigidbody2D.IsTouching(tvObjectComponent.ObjectContactFilter2D);
+            var onGround = componentController.Rigidbody2D.IsTouching(componentController.GroundContactFilter2D);
+            var onObject = componentController.Rigidbody2D.IsTouching(componentController.ObjectContactFilter2D);
             if(onGround || onObject) transitionState.TransitionState(TVStateType.NonDivedIdling);
         }
 
         public void MyFixedUpdate()
         {
-            //下に落下させる
-            tvObjectComponent.Rigidbody2D.velocity = Vector2.down * 5f;
+            componentController.Rigidbody2D.velocity = Vector2.down * 10f;
         }
 
         public void Exit()
         {
-            tvObjectComponent.Rigidbody2D.velocity = Vector2.zero;
+            componentController.Rigidbody2D.velocity = Vector2.zero;
+            //重力を元に戻す
+            componentController.Rigidbody2D.gravityScale = 1;
         }
     }
 }

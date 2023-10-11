@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TettekeKobo.GhostDivePuzzle
 {
     /// <summary>
-    /// 
+    /// FanNotDivedIdlingState
     /// </summary>
     public class FanNotDivedIdlingState : IHamuState
     {
@@ -14,67 +14,47 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<FanStateType> transitionState;
         /// <summary>
-        /// 扇風機のコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly FanObjectComponentController fanObjectComponent;
-        
+        private readonly FanObjectComponentController componentController;
+
         /// <summary>
         /// コンストラクター
         /// </summary>
         public FanNotDivedIdlingState(ITransitionState<FanStateType> ts, FanObjectComponentController focc)
         {
             transitionState = ts;
-            fanObjectComponent = focc;
+            componentController = focc;
         }
         
         public void Enter()
         {
-            //動かす必要がないのでKinematic & 全て固定させる
-            fanObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            fanObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            //基本動かさないのでDynamic&FreezeAllにしておく
+            //重力は効かせたいのでDynamicにしておく
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            componentController.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         }
 
         public void MyUpdate()
         {
-            //下にプレイヤーがいないかチェックする
-            var resultCenter = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(fanObjectComponent.BoxCollider2D);
-            var hitPlayer = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -fanObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, fanObjectComponent.PlayerLayer);
+            //真下にプレイヤーがいるかチェック
+            var result = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(componentController.BoxCollider2D);
+            var length = -1 * componentController.transform.lossyScale.y / 2;
+            var hitPlayer = VisualPhysics2D.Raycast(result + new Vector2(0, length) + new Vector2(0, -0.01f), Vector2.down, 0.9f, componentController.PlayerLayer);
             if (hitPlayer)
             {
+                //ダイブしてたら追従させる
                 var playerStateBehaviour = Object.FindObjectOfType<PlayerStateBehaviour>();
-                //ダイブしていなかったらリターン
                 if(!playerStateBehaviour.PlayerStateMachine.IsDiving) return;
                 transitionState.TransitionState(FanStateType.NonDivedOnPlayerStaying);
                 return;
             }
-
-            //下に地面やオブジェクトがないかチェックする
-            var resultVertices = BoxCollider2DPositionCalculator.GetBoxCollide2DVertices(fanObjectComponent.BoxCollider2D);
-            var leftHitGround = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.GroundLayer);
-            var leftHitObject = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.ObjectLayer);
-            var leftHitPlayer = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.PlayerLayer);
-            var rightHitGround = VisualPhysics2D.Raycast(resultVertices[2] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.GroundLayer);
-            var rightHitObject = VisualPhysics2D.Raycast(resultVertices[2] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.ObjectLayer);
-            var rightHitPlayer = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, fanObjectComponent.PlayerLayer);
-            var centerHitGround = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -fanObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, fanObjectComponent.GroundLayer);
-            var centerHitObject = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -fanObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, fanObjectComponent.ObjectLayer);
-            if (leftHitGround || leftHitObject ||  leftHitPlayer || rightHitGround || rightHitObject || rightHitPlayer ||centerHitGround || centerHitObject)
-            {
-                //設定中は何もしない
-            }
-            else
-            {
-                transitionState.TransitionState(FanStateType.NonDivedFalling);
-            }
+            
+            //下にオブジェクトや地面がなければ落下させる
+            var onGround = componentController.Rigidbody2D.IsTouching(componentController.GroundContactFilter2D);
+            var onObject = componentController.Rigidbody2D.IsTouching(componentController.ObjectContactFilter2D);
+            var onPlayer = componentController.Rigidbody2D.IsTouching(componentController.PlayerContactFilter2D);
+            if(!onGround && !onObject && !onPlayer) transitionState.TransitionState(FanStateType.NonDivedFalling);
         }
 
         public void MyFixedUpdate()

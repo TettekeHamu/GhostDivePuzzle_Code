@@ -39,7 +39,7 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
-            fallingFuncManager.StopFalling(cancellationTokenSource.Token);
+            fallingFuncManager.StopFalling(PlayerDiveType.DiveTomb, cancellationTokenSource.Token);
         }
 
         public void MyUpdate()

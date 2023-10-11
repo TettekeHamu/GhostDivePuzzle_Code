@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
+            SePlayer.Instance.Play("SE_StageClear");
             AsyncLoadNextScene(cancellationTokenSource.Token).Forget();
         }
 

@@ -1,3 +1,4 @@
+using naichilab.EasySoundPlayer.Scripts;
 using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -27,6 +28,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public void Activate()
         {
+            SePlayer.Instance.Play("SE_SolvePuzzle");
             gameObject.SetActive(false);
         }
 

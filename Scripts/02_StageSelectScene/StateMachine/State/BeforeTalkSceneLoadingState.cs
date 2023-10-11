@@ -1,3 +1,4 @@
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -23,6 +24,7 @@ namespace TettekeKobo.GhostDivePuzzle
         public void Enter()
         {
             //Debug.Log("トークシーンに移行！！");
+            BgmPlayer.Instance.Stop();
             //選択したタイルを設定
             PlayStageNumberManager.Instance.SetStageNumber(tilesManager.CurrentSelectedTile);
             //シーンを遷移

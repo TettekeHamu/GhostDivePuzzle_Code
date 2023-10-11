@@ -46,10 +46,19 @@ namespace TettekeKobo.GhostDivePuzzle
             
             //オソナエサキの個数を設定
             targetCount = offeringPlaces.Length;
+            //Debug.Log(targetCount);
             
+            //
             for (var i = 0; i < targetCount; i++)
             {
                 DrawConnectingLine(switchObject.Value.GetObjectPosition(), offeringPlaces[i].transform.position);
+            }
+            
+            //
+            if(targetCount == 0)
+            {
+                DestroyConnectLine();
+                switchObject.Value.Activate();
             }
         }
         
@@ -92,7 +101,7 @@ namespace TettekeKobo.GhostDivePuzzle
             line.endWidth = line.startWidth = 1f;
             line.material = lineMaterial;
             line.textureMode = LineTextureMode.Tile;
-            line.sortingLayerName = "MG_GameObject";
+            line.sortingLayerName = "ObjectLayer";
             line.sortingOrder = 20;
         }
 

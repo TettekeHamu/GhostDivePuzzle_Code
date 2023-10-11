@@ -41,7 +41,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <param name="num"></param>
         public void ShowClearTiles(bool isShow,int num)
         {
-            var startPos = new Vector3(0, -8f, 0);
+            var startPos = new Vector3(0, -14f, 0);
             numberTiles = new NumberTileManager[num];
             
             //最新のステージのみ見せなくさせる

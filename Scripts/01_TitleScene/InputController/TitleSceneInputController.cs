@@ -1,4 +1,3 @@
-using System;
 using TettekeKobo.Singleton;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,7 +29,7 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             //入力を受け取る
             canChangeScene = playerInput.actions["GameStart"].WasPressedThisFrame();
-            canChangeOptionMode = playerInput.actions["ChangeOptionMode"].WasPressedThisFrame();
+            //canChangeOptionMode = playerInput.actions["ChangeOptionMode"].WasPressedThisFrame();
         }
     }
 }

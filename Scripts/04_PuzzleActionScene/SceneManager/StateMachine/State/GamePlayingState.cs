@@ -1,4 +1,5 @@
 using System;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UniRx;
 using UnityEngine;
@@ -49,17 +50,19 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
-            
+            BgmPlayer.Instance.Play("BGM_GameScene");
         }
 
         public void MyUpdate()
         {
-            if (PuzzleActionSceneInputController.Instance.RetryKey)
+            if (PuzzleActionSceneInputController.Instance.RetryKey && !playerStateBehaviour.PlayerStateMachine.IsDeadPlayer)
             {
-                //SceneLoadManager.Instance.LoadNextScene(SceneManager.GetActiveScene().name);
-                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                //SEを止めるためにプレイヤーをDeadにする
+                playerStateBehaviour.PlayerStateMachine.TransitionState(PlayerStateType.Dead);
                 return;
             }
+            
+            /*
             //入力があったらポーズ中に戻す
             if (PuzzleActionSceneInputController.Instance.ChangePauseModeKey)
             {
@@ -71,6 +74,8 @@ namespace TettekeKobo.GhostDivePuzzle
             {
                 CameraManager.Instance.ChangeCamera();
             }
+            */
+            
             //プレイヤーを動かす
             playerStateBehaviour.MyUpDate();
             //ギミックを動かす

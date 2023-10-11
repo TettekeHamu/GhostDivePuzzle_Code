@@ -1,4 +1,8 @@
+using System;
+using naichilab.EasySoundPlayer.Scripts;
+using UniRx;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace TettekeKobo.GhostDivePuzzle
 {
@@ -7,6 +11,14 @@ namespace TettekeKobo.GhostDivePuzzle
     /// </summary>
     public class EnemyEyeManager : MonoBehaviour
     {
+        /// <summary>
+        /// 死んだときに再生するときに
+        /// </summary>
+        [SerializeField] private ParticleSystem deadParticle;
+        /// <summary>
+        /// 捜索範囲を照らすライト
+        /// </summary>
+        [SerializeField] private Light2D light2D;
         /// <summary>
         /// アニメーター
         /// </summary>
@@ -30,12 +42,11 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <summary>
         /// 追うときのスピード
         /// </summary>
-        [SerializeField] private int chaseSpeed;
-
+        [SerializeField] private float chaseSpeed;
         /// <summary>
         /// アニメーション名
         /// </summary>
-        private int animationName = Animator.StringToHash("IsChasing");
+        private readonly int animationName = Animator.StringToHash("IsChasing");
         /// <summary>
         /// プレイヤー
         /// </summary>
@@ -60,9 +71,16 @@ namespace TettekeKobo.GhostDivePuzzle
         /// 移動方向
         /// </summary>
         private bool isMovingForward;
+        
+        private readonly Subject<Unit> onDestroySubject = new Subject<Unit>();
+
+        public IObservable<Unit> OnDestroyObservable => onDestroySubject;
 
         public void Initialize()
         {
+            //ライトの範囲を設定
+            light2D.pointLightOuterRadius = searchingRange;
+            light2D.pointLightInnerRadius = searchingRange / 2f;
             //プレイヤーを取得
             player = FindObjectOfType<PlayerStateBehaviour>();
             //targetPosに開始地点と折り返し地点を格納
@@ -139,10 +157,24 @@ namespace TettekeKobo.GhostDivePuzzle
         
         private void OnTriggerEnter2D(Collider2D col)
         {
+            //プレイヤーかどうかを判断
             var playerStateBehaviour = col.gameObject.GetComponent<PlayerStateBehaviour>();
             
+            //プレイヤーのとき
             if (playerStateBehaviour != null)
             {
+                //プレイヤーが敵を倒せる状態かどうか調べる
+                if (playerStateBehaviour.ComponentController.CanDestroyEnemy)
+                {
+                    Instantiate(deadParticle, transform.position, Quaternion.identity);
+                    onDestroySubject.OnNext(Unit.Default);
+                    playerStateBehaviour.ComponentController.DestroyEnemy();
+                    SePlayer.Instance.Play("SE_EnemyDestroy");
+                    gameObject.SetActive(false); //Destroyだとエラーが出るので非表示に変更させる
+                    return;
+                }
+                
+                //ICollisionEnemyを取得出来たらPlayerに通知する
                 var playerState = playerStateBehaviour.PlayerStateMachine.CurrentState;
                 var collisionEnemy = playerState as ICollisionEnemy;
                 collisionEnemy?.CollisionEnemy();

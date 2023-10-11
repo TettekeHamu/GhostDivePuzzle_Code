@@ -25,6 +25,14 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private FanObjectManager[] fanObjects;
         /// <summary>
+        /// 冷蔵庫を格納する配列
+        /// </summary>
+        private RefrigeratorObjectManager[] refrigeratorObjects;
+        /// <summary>
+        /// 電子レンジを格納する配列
+        /// </summary>
+        private MicrowaveManager[] microwaveObjects;
+        /// <summary>
         /// オソナエサキとスイッチを繋げるクラスの配列
         /// </summary>
         private SwitchConnectManager[] switchConnects;
@@ -72,17 +80,27 @@ namespace TettekeKobo.GhostDivePuzzle
                     fan.Initialize();
                 }
             }
-
-            //オソナエサキとスイッチを繋げるクラス
-            switchConnects = FindObjectsOfType<SwitchConnectManager>();
-            if (switchConnects.Length > 0)
+            
+            //冷蔵庫を初期化させる
+            refrigeratorObjects = FindObjectsOfType<RefrigeratorObjectManager>();
+            if (refrigeratorObjects.Length > 0)
             {
-                foreach (var switchConnect in switchConnects)
+                foreach (var refrigerator in refrigeratorObjects)
                 {
-                    switchConnect.Initialize();
-                }   
+                    refrigerator.Initialize();
+                }
             }
-
+            
+            //電子レンジを初期化させる
+            microwaveObjects = FindObjectsOfType<MicrowaveManager>();
+            if (microwaveObjects.Length > 0)
+            {
+                foreach (var microwave in microwaveObjects)
+                {
+                    microwave.Initialize();
+                }
+            }
+            
             //ジャマモノの初期化をおこなう
             obstacleObjects = FindObjectsOfType<ObstacleObjectManager>();
             if (obstacleObjects.Length > 0)
@@ -95,7 +113,20 @@ namespace TettekeKobo.GhostDivePuzzle
             
             //ゴールを初期化させる
             goalObject = FindObjectOfType<GoalObjectManager>();
-            if(goalObject != null) goalObject.Initialize();
+            if (goalObject != null)
+            {
+                goalObject.Initialize();
+            }
+
+            //オソナエサキとスイッチを繋げるクラス
+            switchConnects = FindObjectsOfType<SwitchConnectManager>();
+            if (switchConnects.Length > 0)
+            {
+                foreach (var switchConnect in switchConnects)
+                {
+                    switchConnect.Initialize();
+                }   
+            }
         }
 
         public void MyUpdate()
@@ -115,6 +146,16 @@ namespace TettekeKobo.GhostDivePuzzle
             {
                 fan.MyUpdate();
             }
+            //冷蔵庫のUpdateをおこなう
+            foreach (var refrigerator in refrigeratorObjects)
+            {
+                refrigerator.MyUpdate();
+            }
+            //電子レンジのUpdateをおこなう
+            foreach (var microwave in microwaveObjects)
+            {
+                microwave.MyUpdate();
+            }
         }
 
         public void MyFixedUpDate()
@@ -133,6 +174,16 @@ namespace TettekeKobo.GhostDivePuzzle
             foreach (var fan in fanObjects)
             {
                 fan.MyFixedUpdate();
+            }
+            //冷蔵庫のFixedUpdateをおこなう
+            foreach (var refrigerator in refrigeratorObjects)
+            {
+                refrigerator.MyFixedUpdate();
+            }
+            //電子レンジのFixedUpdateをおこなう
+            foreach (var microwave in microwaveObjects)
+            {
+                microwave.MyFixedUpdate();
             }
         }
     }

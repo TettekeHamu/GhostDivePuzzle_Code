@@ -17,9 +17,9 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly PlayerComponentController playerComponent;
         /// <summary>
-        /// ダイブ時の機能をまとめたクラス
+        /// 
         /// </summary>
-        private readonly PlayerDiveEnterFuncManager playerDiveEnterFuncManager;
+        private readonly PlayerDiveUpdateFuncManager updateFuncManager;
         /// <summary>
         /// 経過時間
         /// </summary>
@@ -32,7 +32,7 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
-            playerDiveEnterFuncManager = new PlayerDiveEnterFuncManager(ts, pcc);
+            updateFuncManager = new PlayerDiveUpdateFuncManager(ts, pcc);
         }
         
         public void Enter()
@@ -42,17 +42,19 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void MyUpdate()
         {
-            //移動させる、Rigidbodyで移動させると隙間が通れなくなるので注意
-            playerComponent.transform.position +=
-                new Vector3(PuzzleActionSceneInputController.Instance.MoveAxisKey.x, 0, 0).normalized * (playerComponent.MoveSpeed / 2 * Time.deltaTime);
-            
-            //var onGround = playerDiveEnterFuncManager.CheckOnGround();
-            //if (onGround) transitionState.TransitionState(PlayerStateType.FanDivingLand);
+            //接地判定
+            var onGround = updateFuncManager.CheckOnGround();
+            if(onGround) transitionState.TransitionState(PlayerStateType.FanDivingLand);
         }
 
         public void MyFixedUpdate()
         {
-            playerComponent.Rigidbody2D.velocity = Vector2.down * (Mathf.Pow(1.2f, elapsedTime * 15) + 1);
+            //左右に移動させるかつ下方向に落下させる
+            var horizontalVec = PuzzleActionSceneInputController.Instance.MoveAxisKey.x * playerComponent.MoveSpeed / 2f;
+            var fallSpeed = -10 * elapsedTime - 5;
+            if (fallSpeed <= -10) fallSpeed = -10; 
+            //Debug.Log(fallSpeed);
+            playerComponent.Rigidbody2D.velocity = new Vector2(horizontalVec, fallSpeed);
             elapsedTime += Time.fixedDeltaTime;
         }
 
@@ -60,7 +62,7 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             
         }
-        
+
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);

@@ -18,9 +18,17 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         [SerializeField] private BoxCollider2D boxCollider2D;
         /// <summary>
+        /// Colliderコンポーネント
+        /// </summary>
+        [SerializeField] private CircleCollider2D circleCollider2D;
+        /// <summary>
         /// Rigidbody2dコンポーネント
         /// </summary>
         [SerializeField] private Rigidbody2D rb2D;
+        /// <summary>
+        /// Sprite描画用のコンポーネント
+        /// </summary>
+        [SerializeField] private SpriteRenderer spriteRenderer;
         /// <summary>
         /// 地面との接地フィルター(着地判定に使用)
         /// </summary>
@@ -48,7 +56,9 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public OfferingManager OfferingManager => offeringManager;
         public BoxCollider2D BoxCollider2D => boxCollider2D;
+        public CircleCollider2D CircleCollider2D => circleCollider2D;
         public Rigidbody2D Rigidbody2D => rb2D;
+        public SpriteRenderer SpriteRenderer => spriteRenderer;
         public ContactFilter2D GroundContactFilter2D => groundContactFilter2D;
         public ContactFilter2D ObjectContactFilter2D => objectContactFilter2D;
         public ContactFilter2D PlayerContactFilter2D => playerContactFilter2D;

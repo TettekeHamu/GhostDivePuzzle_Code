@@ -1,3 +1,6 @@
+using System;
+using naichilab.EasySoundPlayer.Scripts;
+using UniRx;
 using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -7,6 +10,10 @@ namespace TettekeKobo.GhostDivePuzzle
     /// </summary>
     public class EnemyBardManager : MonoBehaviour
     {
+        /// <summary>
+        /// 死んだときに再生するときに
+        /// </summary>
+        [SerializeField] private ParticleSystem deadParticle;
         /// <summary>
         /// 画像を反転させる用
         /// </summary>
@@ -29,7 +36,11 @@ namespace TettekeKobo.GhostDivePuzzle
         private bool isMovingForward;
 
         private Vector3[] targetPos;
-        
+
+        private readonly Subject<Unit> onDestroySubject = new Subject<Unit>();
+
+        public IObservable<Unit> OnDestroyObservable => onDestroySubject;
+
         /// <summary>
         /// 初期化用のメソッド
         /// </summary>
@@ -39,7 +50,14 @@ namespace TettekeKobo.GhostDivePuzzle
             transform.position = startTransform.position;
             elapsedTime = 0;
             isMovingForward = true;
-            spriteRenderer.flipX = true;
+            if (startTransform.position.x > endTransform.position.x)
+            {
+                spriteRenderer.flipX = false;
+            }
+            else
+            {
+                spriteRenderer.flipX = true;
+            }
         }
 
         /// <summary>
@@ -47,6 +65,8 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public void MyUpDate()
         {
+            //if(startTransform.position.x == endTransform.position.x) return;
+
             //時間を加算
             elapsedTime += Time.deltaTime;
 
@@ -59,7 +79,7 @@ namespace TettekeKobo.GhostDivePuzzle
                 //経過時間を超えたら元に戻す
                 if (elapsedTime >= moveTime)
                 {
-                    spriteRenderer.flipX = false;
+                    spriteRenderer.flipX = !spriteRenderer.flipX;
                     isMovingForward = false;
                     elapsedTime = 0f;
                 }
@@ -70,7 +90,7 @@ namespace TettekeKobo.GhostDivePuzzle
 
                 if (elapsedTime >= moveTime)
                 {
-                    spriteRenderer.flipX = true;
+                    spriteRenderer.flipX = !spriteRenderer.flipX;
                     isMovingForward = true;
                     elapsedTime = 0f;
                 }
@@ -85,6 +105,17 @@ namespace TettekeKobo.GhostDivePuzzle
             //プレイヤーのとき
             if (playerStateBehaviour != null)
             {
+                //プレイヤーが敵を倒せる状態かどうか調べる
+                if (playerStateBehaviour.ComponentController.CanDestroyEnemy)
+                {
+                    Instantiate(deadParticle, transform.position, Quaternion.identity);
+                    onDestroySubject.OnNext(Unit.Default);
+                    playerStateBehaviour.ComponentController.DestroyEnemy();
+                    SePlayer.Instance.Play("SE_EnemyDestroy");
+                    gameObject.SetActive(false); //Destroyだとエラーが出るので非表示に変更させる
+                    return;
+                }
+                
                 //ICollisionEnemyを取得出来たらPlayerに通知する
                 var playerState = playerStateBehaviour.PlayerStateMachine.CurrentState;
                 var collisionEnemy = playerState as ICollisionEnemy;

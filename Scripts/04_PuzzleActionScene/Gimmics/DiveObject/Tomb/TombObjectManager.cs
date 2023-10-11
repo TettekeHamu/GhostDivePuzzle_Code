@@ -1,3 +1,4 @@
+using System;
 using UniRx;
 using UnityEngine;
 
@@ -23,10 +24,24 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public TombObjectComponentController TombObjectComponent => tombObjectComponent;
 
+        /*
         private void OnCollisionStay2D(Collision2D collision)
         {
             //プレイヤーかどうかを判断
             var playerStateBehaviour = collision.gameObject.GetComponent<PlayerStateBehaviour>();
+            
+            //プレイヤーのとき
+            if (playerStateBehaviour != null)
+            {
+                //CollisionPlayer(playerStateBehaviour);
+            }
+        }
+        */
+
+        private void OnTriggerStay2D(Collider2D other)
+        {
+            //プレイヤーかどうかを判断
+            var playerStateBehaviour = other.gameObject.GetComponent<PlayerStateBehaviour>();
             
             //プレイヤーのとき
             if (playerStateBehaviour != null)

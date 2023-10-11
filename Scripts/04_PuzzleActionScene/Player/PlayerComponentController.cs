@@ -1,3 +1,5 @@
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -15,6 +17,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーを動かす用のコンポーネントを格納
         /// </summary>
         [SerializeField] private Rigidbody2D rb2D;
+        /// <summary>
+        /// プレイヤーの描画をおこなうコンポーネント
+        /// </summary>
+        [SerializeField] private SpriteRenderer spriteRenderer;
         /// <summary>
         /// アニメーションを管理するコンポーネント
         /// </summary>
@@ -56,6 +62,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private float currentPlayerLife;
         /// <summary>
+        /// 敵を倒せるかどうか（trueなら倒せる）
+        /// </summary>
+        private bool canDestroyEnemy;
+        /// <summary>
         /// ダイブ先のオハカ
         /// </summary>
         private TombObjectManager tombObject;
@@ -67,9 +77,18 @@ namespace TettekeKobo.GhostDivePuzzle
         /// ダイブ先の扇風機
         /// </summary>
         private FanObjectManager fanObject;
+        /// <summary>
+        /// ダイブ先の冷蔵庫
+        /// </summary>
+        private RefrigeratorObjectManager refrigeratorObject;
+        /// <summary>
+        /// ダイブ先の電子レンジ
+        /// </summary>
+        private MicrowaveManager microwaveObject;
 
         public BoxCollider2D BoxCollider2D => boxCollider2D;
         public Rigidbody2D Rigidbody2D => rb2D;
+        public SpriteRenderer SpriteRenderer => spriteRenderer;
         public PlayerAnimationManager AnimationManager => animationManager;
         public PlayerParticleManager ParticleManager => particleManager;
         public PlayerLightManager[] PlayerLights => playerLights;
@@ -77,16 +96,50 @@ namespace TettekeKobo.GhostDivePuzzle
         public ContactFilter2D ContactFilter2D => contactFilter2D;
         public float MoveSpeed => moveSpeed;
         public float FallSpeed => fallSpeed;
+        public bool CanDestroyEnemy => canDestroyEnemy;
         public TombObjectManager TombObject => tombObject;
         public TVObjectManager TVObject => tvObject;
         public FanObjectManager FanObject => fanObject;
+        public RefrigeratorObjectManager RefrigeratorObject => refrigeratorObject;
+        public MicrowaveManager MicrowaveObject => microwaveObject;
 
         public void Initialize(PlayerUIManager uiManager)
         {
+            //敵を倒せなくさせる
+            canDestroyEnemy = false;
             //UIManagerをSceneManagerから受け取る
             playerUIManager = uiManager;
             //ライフを設定
             currentPlayerLife = maxPlayerLife;
+            //パーティクルを再生
+            particleManager.PlayTrailParticle();
+            //パーティクルを追従させる
+            this.UpdateAsObservable()
+                .Subscribe(_ => particleManager.FollowPlayer(transform.position))
+                .AddTo(this);
+        }
+        
+        //敵を倒せるようにする処理
+        public void ChangeCanDestroyEnemy(bool can)
+        {
+            canDestroyEnemy = can;
+        }
+
+        /// <summary>
+        /// 敵を倒すときに呼び出される処理
+        /// </summary>
+        public void DestroyEnemy()
+        {
+            if (microwaveObject != null)
+            {
+                microwaveObject.ComponentController.RunOutPower();
+                canDestroyEnemy = false;
+            }
+            else if (refrigeratorObject != null)
+            {
+                refrigeratorObject.ComponentController.RunOutPower();
+                canDestroyEnemy = false;
+            }
         }
 
         /// <summary>
@@ -139,10 +192,27 @@ namespace TettekeKobo.GhostDivePuzzle
         }
         
         /// <summary>
+        /// ダイブ先の冷蔵庫を設定する処理
+        /// </summary>
+        public void SetRefrigeratorObject(RefrigeratorObjectManager refrigerator)
+        {
+            refrigeratorObject = refrigerator;
+        }
+
+        /// <summary>
+        /// ダイブ先の電子レンジを設定する処理
+        /// </summary>
+        public void SetMicrowaveObject(MicrowaveManager microwave)
+        {
+            microwaveObject = microwave;
+        }
+        
+        /// <summary>
         /// オハカへのダイブをやめる際の処理、Playerが呼びだす
         /// </summary>
         public void StopDiving()
         {
+            tombObject.TombObjectComponent.SpriteRenderer.gameObject.SetActive(true);
             tombObject.StopDiving();
             tombObject = null;
         }
@@ -163,6 +233,24 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             fanObject.StopDiving();
             fanObject = null;
+        }
+
+        /// <summary>
+        /// 冷蔵庫へのダイブをやめる際の処理、Playerが呼びだす
+        /// </summary>
+        public void StopRefrigeratorDiving()
+        {
+            refrigeratorObject.StopDiving();
+            refrigeratorObject = null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void StopMicrowaveDiving()
+        {
+            microwaveObject.StopDiving();
+            microwaveObject = null;
         }
     }
 }

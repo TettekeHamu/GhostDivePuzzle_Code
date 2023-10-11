@@ -42,11 +42,13 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void MyUpdate()
         {
+            /*
             //入力があったらプレイ(GamePlaying)中に戻す
             if (PuzzleActionSceneInputController.Instance.ChangePauseModeKey)
             {
                 transitionState.TransitionState(PuzzleActionSceneModeType.GamePlaying);
             }
+            */
         }
 
         public void MyFixedUpdate()

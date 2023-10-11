@@ -24,7 +24,11 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーのStateMachineのgetter(Stateを取得する用)
         /// </summary>
         public PlayerStateMachine PlayerStateMachine => playerStateMachine;
-        
+        /// <summary>
+        /// 敵と接触した際にたおせるかどうか判定するためのgetter
+        /// </summary>
+        public PlayerComponentController ComponentController => componentController;
+
         /// <summary>
         /// 初期化用の処理
         /// </summary>
@@ -89,6 +93,24 @@ namespace TettekeKobo.GhostDivePuzzle
         public void SetFanObject(FanObjectManager fanObject)
         {
             componentController.SetFanObject(fanObject);
+        }
+        
+        /// <summary>
+        /// ダイブ先の冷蔵庫を設定する処理
+        /// </summary>
+        /// <param name="refrigeratorObject"></param>
+        public void SetRefrigeratorObject(RefrigeratorObjectManager refrigeratorObject)
+        {
+            componentController.SetRefrigeratorObject(refrigeratorObject);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="microwaveObject"></param>
+        public void SetMicrowaveObject(MicrowaveManager microwaveObject)
+        {
+            componentController.SetMicrowaveObject(microwaveObject);
         }
 
         /// <summary>

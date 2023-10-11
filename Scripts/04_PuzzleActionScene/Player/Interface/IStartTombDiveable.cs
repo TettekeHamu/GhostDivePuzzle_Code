@@ -19,5 +19,15 @@ namespace TettekeKobo.GhostDivePuzzle
         /// 扇風機にダイブを開始する処理
         /// </summary>
         public void StartFanDive();
+
+        /// <summary>
+        /// 冷蔵庫にダイブを開始する処理
+        /// </summary>
+        public void StartRefrigeratorDive();
+
+        /// <summary>
+        /// 電子レンジにダイブを開始する処理
+        /// </summary>
+        public void StartMicrowaveDive();
     }
 }

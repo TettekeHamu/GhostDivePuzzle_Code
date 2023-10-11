@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TettekeKobo.GhostDivePuzzle
 {
     /// <summary>
-    /// 
+    /// FanNotDivedOnPlayerStayingState
     /// </summary>
     public class FanNotDivedOnPlayerStayingState : IHamuState
     {
@@ -14,9 +14,9 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<FanStateType> transitionState;
         /// <summary>
-        /// 扇風機のコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly FanObjectComponentController fanObjectComponent;
+        private readonly FanObjectComponentController componentController;
         /// <summary>
         /// プレイヤー
         /// </summary>
@@ -25,35 +25,37 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーの座標
         /// </summary>
         private Vector3 playerPos;
-        
+
         /// <summary>
         /// コンストラクター
         /// </summary>
         public FanNotDivedOnPlayerStayingState(ITransitionState<FanStateType> ts, FanObjectComponentController focc)
         {
             transitionState = ts;
-            fanObjectComponent = focc;
+            componentController = focc;
         }
         
         public void Enter()
         {
-            //物理演算で動かないようにする
-            fanObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            fanObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            //Dynamicだとうまく下にいるプレイヤーに追従しないため、Kinematicにする
+            //プレイヤーに密接させたいため下方向に速度をかける
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            componentController.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
 
             //プレイヤーに追従させるため、自身をPlayerの子オブジェクトに設定する
             playerStateBehaviour = Object.FindObjectOfType<PlayerStateBehaviour>();
-            fanObjectComponent.transform.parent = playerStateBehaviour.transform;
+            componentController.transform.parent = playerStateBehaviour.transform;
 
             playerPos = playerStateBehaviour.transform.position;
         }
 
         public void MyUpdate()
         {
+            
             //下にプレイヤーがいるかチェックする
             //位置ずれしても大丈夫なように3本のRayで確認する
-            var result = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(fanObjectComponent.BoxCollider2D);
-            var centerHitPlayer = VisualPhysics2D.Raycast(result+ new Vector2(0, -fanObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f), Vector2.down, 0.9f, fanObjectComponent.PlayerLayer);
+            var result = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(componentController.BoxCollider2D);
+            var centerHitPlayer = VisualPhysics2D.Raycast(result + new Vector2(0, -componentController.transform.lossyScale.y / 2) + new Vector2(0, -0.01f), Vector2.down, 0.9f, componentController.PlayerLayer);
             if (centerHitPlayer　&& playerStateBehaviour.PlayerStateMachine.IsDiving)
             {
                 //ダイブ中のプレイヤーの上にいるなら座標を取得する
@@ -62,9 +64,9 @@ namespace TettekeKobo.GhostDivePuzzle
             else
             {
                 //下に地面やオハカがないかチェックする
-                //こっちはisTouchingでOK！！
-                var onGround = fanObjectComponent.Rigidbody2D.IsTouching(fanObjectComponent.GroundContactFilter2D);
-                var onObject = fanObjectComponent.Rigidbody2D.IsTouching(fanObjectComponent.ObjectContactFilter2D);
+                var onGround = componentController.Rigidbody2D.IsTouching(componentController.GroundContactFilter2D);
+                var onObject = componentController.Rigidbody2D.IsTouching(componentController.ObjectContactFilter2D);
+                var onPlayer = componentController.Rigidbody2D.IsTouching(componentController.PlayerContactFilter2D); 
                 if(onGround || onObject) transitionState.TransitionState(FanStateType.NonDivedIdling);
                 else transitionState.TransitionState(FanStateType.NonDivedFalling);
             }
@@ -80,8 +82,8 @@ namespace TettekeKobo.GhostDivePuzzle
             //親を元に戻してあげる
             //プレイヤーがダイブ終了した時点も子オブジェクトになっているため、ダイブ終了後もプレイヤーの頭上にオハカが乗ってしまうため位置を補正してあげる
             var playerComponentController = playerStateBehaviour.GetComponent<PlayerComponentController>();
-            fanObjectComponent.transform.parent = playerComponentController.DiveObjectTilemapTransform;
-            fanObjectComponent.transform.position -= playerComponentController.transform.position - playerPos;
+            componentController.transform.parent = playerComponentController.DiveObjectTilemapTransform;
+            componentController.transform.position -= playerComponentController.transform.position - playerPos;
             playerStateBehaviour = null;
         }
     }

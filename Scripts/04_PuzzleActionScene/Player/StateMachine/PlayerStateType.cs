@@ -17,13 +17,14 @@ namespace TettekeKobo.GhostDivePuzzle
         DivingOffering = 35,
         DivingJumpUp = 36,
         DivingJumpDown = 37,
-        DiveJumpStay = 38,
-        
+
         TVDivingStart = 40,
         TVDivingIdle = 41,
         TVDivingMove = 42,
         TVDivingFall = 43,
         TVDivingLand = 44,
+        TVDivingJumpUp = 45,
+        TVDivingJumpDown = 46,
         
         FanDivingStart = 50,
         FanDivingIdle = 51,
@@ -32,17 +33,37 @@ namespace TettekeKobo.GhostDivePuzzle
         FanDivingLand = 54,
         FanDivingJumpUp = 55,
         FanDivingJumpDown = 56,
-        FanDivingJumpIdle = 57,
+
+        RefrigeratorDivingStart = 60,
+        RefrigeratorDivingIdle = 61,
+        RefrigeratorDivingMove = 62,
+        RefrigeratorDivingFall = 63,
+        RefrigeratorDivingLand = 64,
+        RefrigeratorDivingJumpUp = 65,
+        RefrigeratorDivingJumpDown = 66,
         
+        MicrowaveDivingStart = 70,
+        MicrowaveDivingIdle = 71,
+        MicrowaveDivingMove = 72,
+        MicrowaveDivingFall = 73,
+        MicrowaveDivingLand = 74,
+        MicrowaveDivingJumpUp = 75,
+        MicrowaveDivingJumpDown = 76,
+
         Dead = 1000
     };
 
+    /// <summary>
+    /// プレイヤーのダイブ先を表すEnum
+    /// </summary>
     public enum PlayerDiveType
     {
         Non = 0,
         NotDive = 1,
-        DiveTomb = 2,
-        DiveTV = 3,
-        DiveFan = 4
+        DiveTomb = 10,
+        DiveTV = 20,
+        DiveFan = 30,
+        DiveRefrigerator = 40,
+        DiveMicrowave = 50
     };
 }

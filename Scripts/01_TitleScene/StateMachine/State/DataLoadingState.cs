@@ -64,8 +64,8 @@ namespace TettekeKobo.GhostDivePuzzle
         private async UniTaskVoid AsyncLoadSaveData(CancellationToken token)
         {
             await UniTask.DelayFrame(1, cancellationToken: token);
-            //ここでセーブデータの読み込みをおこなう(とりあえず4ステージ用意)
-            var clearMaxStageNumber = 4;
+            //ここでセーブデータの読み込みをおこなう(とりあえず6ステージ用意)
+            var clearMaxStageNumber = 6;
             //GameDataを管理する方に設定する
             GameDataManager.Instance.SetClearStageNumber(clearMaxStageNumber);
             //Stateを変更する

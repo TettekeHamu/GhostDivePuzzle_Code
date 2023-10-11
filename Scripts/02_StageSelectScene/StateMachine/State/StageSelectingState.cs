@@ -1,7 +1,9 @@
 using System;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TettekeKobo.GhostDivePuzzle
 {
@@ -14,6 +16,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// Stateを遷移させる処理をもつインターフェース
         /// </summary>
         private readonly ITransitionState<StageSelectSceneModeType> transitionStageSelectState;
+        /// <summary>
+        /// ステージ名を表示するText
+        /// </summary>
+        private readonly Text stageNameText;
         /// <summary>
         /// タイルを管理する用のコンポーネント
         /// </summary>
@@ -32,10 +38,12 @@ namespace TettekeKobo.GhostDivePuzzle
         private IDisposable downKeyDisposable;
 
         public StageSelectingState(ITransitionState<StageSelectSceneModeType> transitionStageSelectState,
+                                    Text nameText,
                                     TilesManager tilesManager,
                                     StageSelectPlayerManager playerManager)
         {
             this.transitionStageSelectState = transitionStageSelectState;
+            this.stageNameText = nameText;
             this.tilesManager = tilesManager;
             this.playerManager = playerManager;
         }
@@ -62,10 +70,34 @@ namespace TettekeKobo.GhostDivePuzzle
                     //早期リターン
                     if (newStageNumber >= tilesManager.CanSelectNumberTiles.Count) return;
                     //ステージ数をあげる
-                    //Debug.Log($"新しく選択したステージは{newStageNumber}です");
                     tilesManager.SetCurrentSelectedTile(newStageNumber);
                     //プレイヤーを移動させる
                     playerManager.MovePlayer(tilesManager.CanSelectNumberTiles[newStageNumber].transform);
+                    //Textを変更させる
+                    switch (newStageNumber)
+                    {
+                        case 0:
+                            stageNameText.text = $"チュートリアル 封木山麓";
+                            break;
+                        case 1:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山山腰";
+                            break;
+                        case 2:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山中腹";
+                            break;
+                        case 3:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山山頂付近";
+                            break;
+                        case 4:
+                            stageNameText.text = $"ステージ {newStageNumber} 湯楽神社への道";
+                            break;
+                        case 5:
+                            stageNameText.text = $"ステージ {newStageNumber} 湯楽神社入口";
+                            break;
+                        default:
+                            stageNameText.text = "ステージ名が不明です";
+                            break;
+                    }
                 });
 
             //ステージ数をさげる用の処理
@@ -90,6 +122,31 @@ namespace TettekeKobo.GhostDivePuzzle
                     tilesManager.SetCurrentSelectedTile(newStageNumber);
                     //プレイヤーを移動させる
                     playerManager.MovePlayer(tilesManager.CanSelectNumberTiles[newStageNumber].transform);
+                    //Textを変更させる
+                    switch (newStageNumber)
+                    {
+                        case 0:
+                            stageNameText.text = $"チュートリアル 封木山麓";
+                            break;
+                        case 1:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山山腰";
+                            break;
+                        case 2:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山中腹";
+                            break;
+                        case 3:
+                            stageNameText.text = $"ステージ {newStageNumber} 封木山山頂付近";
+                            break;
+                        case 4:
+                            stageNameText.text = $"ステージ {newStageNumber} 湯楽神社への道";
+                            break;
+                        case 5:
+                            stageNameText.text = $"ステージ {newStageNumber} 湯楽神社入口";
+                            break;
+                        default:
+                            stageNameText.text = "ステージ名が不明です";
+                            break;
+                    }
                 });
         }
 
@@ -98,6 +155,7 @@ namespace TettekeKobo.GhostDivePuzzle
             //Enterキーを押されたらステージを決定
             if (StageSelectSceneInputController.Instance.DecidePlayStageKey)
             {
+                SePlayer.Instance.Play("SE_Decide");
                 transitionStageSelectState.TransitionState(StageSelectSceneModeType.SceneLoading);
             }
         }

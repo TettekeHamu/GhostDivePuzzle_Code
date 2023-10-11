@@ -1,3 +1,4 @@
+using naichilab.EasySoundPlayer.Scripts;
 using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
@@ -19,7 +20,6 @@ namespace TettekeKobo.GhostDivePuzzle
         private void Awake()
         {
             //UIManagerの初期化
-            Application.targetFrameRate = 60;
             titleUIController.Initialize();
         }
 

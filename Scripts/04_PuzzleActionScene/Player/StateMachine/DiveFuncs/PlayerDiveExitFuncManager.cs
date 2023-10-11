@@ -57,6 +57,12 @@ namespace TettekeKobo.GhostDivePuzzle
                     case PlayerDiveType.DiveFan:
                         playerComponent.StopFanDiving();
                         return;
+                    case PlayerDiveType.DiveRefrigerator:
+                        playerComponent.StopRefrigeratorDiving();
+                        return;
+                    case PlayerDiveType.DiveMicrowave:
+                        playerComponent.StopMicrowaveDiving();
+                        return;
                     default:
                         Debug.LogWarning("そんなオブジェクトは存在しません");
                         return;
@@ -83,6 +89,12 @@ namespace TettekeKobo.GhostDivePuzzle
                         return;
                     case PlayerDiveType.DiveFan:
                         playerComponent.StopFanDiving();
+                        return;
+                    case PlayerDiveType.DiveRefrigerator:
+                        playerComponent.StopRefrigeratorDiving();
+                        return;
+                    case PlayerDiveType.DiveMicrowave:
+                        playerComponent.StopMicrowaveDiving();
                         return;
                     default:
                         Debug.LogWarning("そんなオブジェクトは存在しません");
@@ -111,6 +123,12 @@ namespace TettekeKobo.GhostDivePuzzle
                     case PlayerDiveType.DiveFan:
                         playerComponent.StopFanDiving();
                         return;
+                    case PlayerDiveType.DiveRefrigerator:
+                        playerComponent.StopRefrigeratorDiving();
+                        return;
+                    case PlayerDiveType.DiveMicrowave:
+                        playerComponent.StopMicrowaveDiving();
+                        return;
                     default:
                         Debug.LogWarning("そんなオブジェクトは存在しません");
                         return;
@@ -137,6 +155,12 @@ namespace TettekeKobo.GhostDivePuzzle
                         return;
                     case PlayerDiveType.DiveFan:
                         playerComponent.StopFanDiving();
+                        return;
+                    case PlayerDiveType.DiveRefrigerator:
+                        playerComponent.StopRefrigeratorDiving();
+                        return;
+                    case PlayerDiveType.DiveMicrowave:
+                        playerComponent.StopMicrowaveDiving();
                         return;
                     default:
                         Debug.LogWarning("そんなオブジェクトは存在しません");

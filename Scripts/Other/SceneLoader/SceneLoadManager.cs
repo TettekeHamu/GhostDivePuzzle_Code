@@ -58,7 +58,7 @@ namespace TettekeKobo.GhostDivePuzzle
             yield return EndTransitionSceneAnimeCoroutine(loadTime / 2);
             //マネージャーにシーンの読み込みが終わったことを伝える
             var setUpScene = GetComponentInterface.FindObjectOfInterface<ISetUpScene>();
-            setUpScene.SetUpScene();
+            setUpScene?.SetUpScene();
         }
 
         /// <summary>
@@ -73,16 +73,15 @@ namespace TettekeKobo.GhostDivePuzzle
             fadeImage.transform.localScale = Vector3.zero;
             //キャンバスをオンに
             canvas.gameObject.SetActive(true);
-            //画面サイズを取得
-            var screenSize = new Vector2(Screen.width, Screen.height);
-            //Debug.Log($"画面サイズは {screenSize} です");
+            //画面サイズを取得（画像の縦横比が変わらないように大きいほうのみを取得）
+            var screenSize = new Vector2(Screen.width, Screen.width);
             //大きくする
             yield return fadeImage.transform
-                .DOScale(screenSize / 75f, animationTime / 3)
+                .DOScale(screenSize / 100f, animationTime / 3)
                 .WaitForCompletion();
             //小さくする
             yield return fadeImage.transform
-                .DOScale(screenSize / 125f, animationTime / 3)
+                .DOScale(screenSize / 150f, animationTime / 3)
                 .WaitForCompletion();
             //大きくして、画面を埋める
             yield return fadeImage.transform
@@ -96,15 +95,15 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <param name="animationTime">アニメーションの時間</param>
         private IEnumerator EndTransitionSceneAnimeCoroutine(float animationTime)
         {
-            //画面サイズを取得
-            var screenSize = new Vector2(Screen.width, Screen.height);
+            //画面サイズを取得（画像の縦横比が変わらないように大きいほうのみを取得）
+            var screenSize = new Vector2(Screen.width, Screen.width);
             //小さくする
             yield return fadeImage.transform
-                .DOScale(screenSize / 75f, animationTime / 3)
+                .DOScale(screenSize / 150f, animationTime / 3)
                 .WaitForCompletion();
             //少し大きくする
             yield return fadeImage.transform
-                .DOScale(screenSize / 50f, animationTime / 3)
+                .DOScale(screenSize / 100f, animationTime / 3)
                 .WaitForCompletion();
             //0まで小さくする
             yield return fadeImage.transform

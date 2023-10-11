@@ -1,3 +1,7 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,7 +11,7 @@ namespace TettekeKobo.GhostDivePuzzle
     /// <summary>
     /// 死んでいるときのState
     /// </summary>
-    public class DeadState : IHamuState
+    public class DeadState : IHamuState,IDisposable
     {
         /// <summary>
         /// Stateを変更させる処理を持つインタフェース
@@ -17,6 +21,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーのコンポーネントをまとめたクラス
         /// </summary>
         private readonly PlayerComponentController playerComponent;
+        /// <summary>
+        /// キャンセル用のトークンソース
+        /// </summary>
+        private readonly CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
         /// コンストラクター
@@ -25,14 +33,13 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
+            cancellationTokenSource = new CancellationTokenSource();
         }
         
         public void Enter()
         {
-            Debug.Log("やり直し！！");
-            playerComponent.Rigidbody2D.velocity = Vector2.zero;
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //SceneLoadManager.Instance.LoadNextScene(SceneManager.GetActiveScene().name);
+            SePlayer.Instance.Play("SE_PlayerDead");
+            AsyncDeadPlayer(cancellationTokenSource.Token).Forget();
         }
 
         public void MyUpdate()
@@ -48,6 +55,22 @@ namespace TettekeKobo.GhostDivePuzzle
         public void Exit()
         {
             
+        }
+
+        private async UniTaskVoid AsyncDeadPlayer(CancellationToken token)
+        {
+            playerComponent.SpriteRenderer.enabled = false;
+            playerComponent.Rigidbody2D.velocity = Vector2.zero;
+            var time = playerComponent.ParticleManager.PlayDeadParticle();
+            await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: token);
+            //Debug.Log("やり直し");
+            //シーンの再読み込みをおこなう
+            SceneLoadManager.Instance.LoadNextScene(SceneManager.GetActiveScene().name);
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource?.Dispose();
         }
     }
 }

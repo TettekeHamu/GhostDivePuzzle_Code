@@ -1,7 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Nomnom.RaycastVisualization;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -37,7 +37,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <param name="token"></param>
         public void DiveStart(PlayerDiveType diveType, CancellationToken token)
         {
-            //種類に応じてアニメーションを変える
+            //ダイブ先の種類に応じてアニメーションを変える
             switch (diveType)
             {
                 case PlayerDiveType.DiveTomb:
@@ -48,6 +48,12 @@ namespace TettekeKobo.GhostDivePuzzle
                     break;
                 case PlayerDiveType.DiveFan:
                     playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsFanDiving,true);
+                    break;
+                case PlayerDiveType.DiveRefrigerator:
+                    playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsRefrigeratorDiving,true);
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsMicrowaveDiving,true);
                     break;
                 default:
                     Debug.LogWarning("ダイブ先が不明です");
@@ -81,6 +87,12 @@ namespace TettekeKobo.GhostDivePuzzle
                 case PlayerDiveType.DiveFan:
                     length = playerComponent.AnimationManager.GetAnimationLength("Player_DiveStarting_FanAnimation");
                     break;
+                case PlayerDiveType.DiveRefrigerator:
+                    length = playerComponent.AnimationManager.GetAnimationLength("Player_DiveStarting_RefrigeratorAnimation");
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    length = playerComponent.AnimationManager.GetAnimationLength("Player_DiveStarting_MicrowaveAnimation");
+                    break;
                 default:
                     Debug.LogWarning("ダイブ先が不明です");
                     break;
@@ -102,6 +114,12 @@ namespace TettekeKobo.GhostDivePuzzle
                 case PlayerDiveType.DiveFan:
                     differencePos = playerComponent.FanObject.transform.position - playerComponent.transform.position;
                     break;
+                case PlayerDiveType.DiveRefrigerator:
+                    differencePos = playerComponent.RefrigeratorObject.transform.position - playerComponent.transform.position;
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    differencePos = playerComponent.MicrowaveObject.transform.position - playerComponent.transform.position;
+                    break;
                 default:
                     Debug.LogWarning("ダイブ先が不明です");
                     break;
@@ -113,6 +131,8 @@ namespace TettekeKobo.GhostDivePuzzle
             await playerComponent.transform.DOMove(new Vector3(differencePos.x / 2, -4, 0), length / 2.0f)
                 .SetRelative(true)
                 .ToUniTask(cancellationToken: token);
+            
+            SePlayer.Instance.Play("SE_PlayerDive");
             
             //コントローラを振動させる
             PuzzleActionSceneInputController.Instance.VibrationGamePad();
@@ -133,6 +153,12 @@ namespace TettekeKobo.GhostDivePuzzle
                     break;
                 case PlayerDiveType.DiveFan:
                     playerComponent.FanObject.SetPlayerTransform(playerComponent.transform);
+                    break;
+                case PlayerDiveType.DiveRefrigerator:
+                    playerComponent.RefrigeratorObject.SetPlayerTransform(playerComponent.transform);
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    playerComponent.MicrowaveObject.SetPlayerTransform(playerComponent.transform);
                     break;
                 default:
                     Debug.LogWarning("ダイブ先が不明です");
@@ -162,6 +188,12 @@ namespace TettekeKobo.GhostDivePuzzle
                     break;
                 case PlayerDiveType.DiveFan:
                     transitionState.TransitionState(PlayerStateType.FanDivingIdle);
+                    break;
+                case PlayerDiveType.DiveRefrigerator:
+                    transitionState.TransitionState(PlayerStateType.RefrigeratorDivingIdle);
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    transitionState.TransitionState(PlayerStateType.MicrowaveDivingIdle);
                     break;
                 default:
                     Debug.LogWarning("ダイブ先が不明です");

@@ -1,3 +1,4 @@
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -17,9 +18,13 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly PlayerComponentController playerComponent;
         /// <summary>
-        /// ダイブ時の機能をまとめたクラス
+        /// ジャンプの初速度
         /// </summary>
-        private readonly PlayerDiveEnterFuncManager playerDiveEnterFuncManager;
+        private readonly float startJumpVelocity;
+        /// <summary>
+        /// 目標地点まで達するまでに必要とする時間」
+        /// </summary>
+        private readonly float requiredTime;
         /// <summary>
         /// 経過時間
         /// </summary>
@@ -32,41 +37,54 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
-            playerDiveEnterFuncManager = new PlayerDiveEnterFuncManager(ts, pcc);
+            requiredTime = 0.8f;
+            var targetHeight = 6.3f; //若干余力を持たして高くする
+            startJumpVelocity = 2 * targetHeight / requiredTime;
         }
         
         public void Enter()
         {
-            //Debug.Log("ジャンプ開始");
+            SePlayer.Instance.Play("SE_PlayerJump");
             elapsedTime = 0;
         }
 
         public void MyUpdate()
         {
-            //横方向に移動させる、Rigidbodyで移動させると隙間が通れなくなるので注意
-            playerComponent.transform.position += new Vector3(PuzzleActionSceneInputController.Instance.MoveAxisKey.x, 0, 0).normalized * (playerComponent.MoveSpeed / 2 * Time.deltaTime);
-           
-            //縦方向に上昇させる、velocityだと上にあるオブジェクトのbodyTypeを変更する必要があるためtransform.positionで実装
-            var upSpeed = (8 - Mathf.Pow(1.2f, elapsedTime * 10) + 1);
-            playerComponent.transform.position += Vector3.up * upSpeed * Time.deltaTime;
-            elapsedTime += Time.deltaTime;
-            if (upSpeed <= 0) transitionState.TransitionState(PlayerStateType.FanDivingJumpIdle);
+            if (!PuzzleActionSceneInputController.Instance.JumpingUpKey)
+            {
+                //待機させずに落下させる
+                transitionState.TransitionState(PlayerStateType.FanDivingJumpDown);
+            }
         }
 
         public void MyFixedUpdate()
         {
-            /*
-            playerComponent.Rigidbody2D.velocity = Vector2.up * (8 - Mathf.Pow(1.2f, elapsedTime * 10) + 1);
+            // 現在の経過時間に対する割合を出す
+            var normalizedTime = elapsedTime / requiredTime;
+
+            // ジャンプ速度を計算
+            var currentJumpSpeed = Mathf.Lerp(startJumpVelocity, 0f, normalizedTime);
+            
+            
+            // Rigidbody2Dにジャンプ速度を設定
+            var horizontalVec = PuzzleActionSceneInputController.Instance.MoveAxisKey.x * playerComponent.MoveSpeed / 2f;
+            playerComponent.Rigidbody2D.velocity = new Vector2(horizontalVec, currentJumpSpeed);
+
+            // ジャンプ時間を更新
             elapsedTime += Time.fixedDeltaTime;
-            if(playerComponent.Rigidbody2D.velocity.y <= 0) transitionState.TransitionState(PlayerStateType.FanDivingJumpIdle);
-            */
+
+            // ジャンプが終了したかを確認
+            if (elapsedTime >= requiredTime)
+            {
+                transitionState.TransitionState(PlayerStateType.FanDivingJumpDown);
+            }
         }
 
         public void Exit()
         {
             
         }
-        
+
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);

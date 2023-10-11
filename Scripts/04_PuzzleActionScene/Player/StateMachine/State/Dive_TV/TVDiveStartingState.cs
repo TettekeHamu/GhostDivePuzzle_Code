@@ -42,7 +42,7 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
-            enterFuncManager.DiveStart(PlayerDiveType.DiveTV,cancellationTokenSource.Token);
+            enterFuncManager.DiveStart(PlayerDiveType.DiveTV, cancellationTokenSource.Token);
         }
 
         public void MyUpdate()

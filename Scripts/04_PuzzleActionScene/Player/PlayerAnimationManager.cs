@@ -51,6 +51,30 @@ namespace TettekeKobo.GhostDivePuzzle
         /// 扇風機にダイブしているかどうか
         /// </summary>
         private readonly int isFanDiving = Animator.StringToHash("IsFanDiving");
+        /// <summary>
+        /// 扇風機にダイブ中に落下してるかどうか
+        /// </summary>
+        private readonly int isFanFalling = Animator.StringToHash("IsFanFalling");
+
+        /// 冷蔵庫関連
+        /// <summary>
+        /// 冷蔵庫にダイブしているかどうか
+        /// </summary>
+        private readonly int isRefrigeratorDiving = Animator.StringToHash("IsRefrigeratorDiving");
+        /// <summary>
+        /// 冷蔵庫にダイブ中に落下しているかどうか
+        /// </summary>
+        private readonly int isRefrigeratorFalling = Animator.StringToHash("IsRefrigeratorFalling");
+
+        ///電子レンジ関連
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly int isMicrowaveDiving = Animator.StringToHash("IsMicrowaveDiving");
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly int isMicrowaveFalling = Animator.StringToHash("IsMicrowaveFalling");
         
         public Animator PlayerAnimator => playerAnimator;
         public int IsMoving => isMoving;
@@ -60,6 +84,11 @@ namespace TettekeKobo.GhostDivePuzzle
         public int IsTVDiving => isTVDiving;
         public int IsTVFalling => isTVFalling;
         public int IsFanDiving => isFanDiving;
+        public int IsFanFalling => isFanFalling;
+        public int IsRefrigeratorDiving => isRefrigeratorDiving;
+        public int IsRefrigeratorFalling => isRefrigeratorFalling;
+        public int IsMicrowaveDiving => isMicrowaveDiving;
+        public int IsMicrowaveFalling => isMicrowaveFalling;
 
         /// <summary>
         /// SpriteRendererの向きを変更する処理

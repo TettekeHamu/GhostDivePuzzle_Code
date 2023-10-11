@@ -1,4 +1,5 @@
 using System;
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -38,13 +39,14 @@ namespace TettekeKobo.GhostDivePuzzle
             transitionState = ts;
             playerComponent = pcc;
             requiredTime = 0.5f;
-            var targetHeight = 3;
+            var targetHeight = 3.3f; //若干余力を持たして高くする
             startJumpVelocity = 2 * targetHeight / requiredTime;
         }
         
         public void Enter()
         {
             //Debug.Log("ジャンプで上昇中！！");
+            SePlayer.Instance.Play("SE_PlayerJump");
             elapsedTime = 0;
         }
 
@@ -65,7 +67,7 @@ namespace TettekeKobo.GhostDivePuzzle
             // ジャンプ速度を計算
             var currentJumpSpeed = Mathf.Lerp(startJumpVelocity, 0f, normalizedTime);
             
-            Debug.Log(currentJumpSpeed);
+            //Debug.Log(currentJumpSpeed);
             
             // Rigidbody2Dにジャンプ速度を設定
             var horizontalVec = PuzzleActionSceneInputController.Instance.MoveAxisKey.x * playerComponent.MoveSpeed / 2f;

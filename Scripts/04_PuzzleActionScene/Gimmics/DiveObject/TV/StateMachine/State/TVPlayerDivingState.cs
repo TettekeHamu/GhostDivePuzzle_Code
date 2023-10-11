@@ -13,25 +13,24 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<TVStateType> transitionState;
         /// <summary>
-        /// TVオブジェクトのコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly TVObjectComponentController tvObjectComponent;
+        private readonly TVObjectComponentController componentController;
         
-        /// <summary>
-        /// コンストラクター
-        /// </summary>
-        public TVPlayerDivingState(ITransitionState<TVStateType> ts, TVObjectComponentController tvocc)
+        public TVPlayerDivingState(ITransitionState<TVStateType> ts, TVObjectComponentController tocc)
         {
             transitionState = ts;
-            tvObjectComponent = tvocc;
+            componentController = tocc;
         }
         
         public void Enter()
         {
             //動かす必要がない & 当たり判定をなくす
-            tvObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            tvObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
-            tvObjectComponent.BoxCollider2D.enabled = false;
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            componentController.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            componentController.BoxCollider2D.enabled = false;
+            //画像を非表示に
+            componentController.SpriteRenderer.enabled = false;
         }
 
         public void MyUpdate()
@@ -46,8 +45,8 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void Exit()
         {
-            tvObjectComponent.BoxCollider2D.enabled = true;
-            tvObjectComponent.TurnOnTVLight(false);
+            componentController.BoxCollider2D.enabled = true;
+            componentController.SpriteRenderer.enabled = true;
         }
     }
 }

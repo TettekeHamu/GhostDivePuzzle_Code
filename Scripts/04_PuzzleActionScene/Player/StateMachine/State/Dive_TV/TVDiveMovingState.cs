@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -6,7 +8,7 @@ namespace TettekeKobo.GhostDivePuzzle
     /// <summary>
     /// TVオブジェクトにダイブ中 & 移動中のState
     /// </summary>
-    public class TVDiveMovingState : IHamuState,ICollisionEnemy
+    public class TVDiveMovingState : IHamuState,ICollisionEnemy,IDisposable
     { 
         /// <summary>
         /// Stateを変更させる処理を持つインタフェース
@@ -24,6 +26,14 @@ namespace TettekeKobo.GhostDivePuzzle
         /// ダイブ終了時の機能をまとめたクラス
         /// </summary>
         private readonly PlayerDiveExitFuncManager exitFuncManager;
+        /// <summary>
+        /// 
+        /// </summary>
+        private CancellationTokenSource cancellationTokenSource;
+        /// <summary>
+        /// 経過時間
+        /// </summary>
+        private float elapsedTime;
 
         /// <summary>
         /// コンストラクター
@@ -34,16 +44,19 @@ namespace TettekeKobo.GhostDivePuzzle
             playerComponent = pcc;
             updateFuncManager = new PlayerDiveUpdateFuncManager(ts, pcc);
             exitFuncManager = new PlayerDiveExitFuncManager(ts, pcc);
+            cancellationTokenSource = new CancellationTokenSource();
         }
         
         public void Enter()
         {
-            
+            cancellationTokenSource = new CancellationTokenSource();
+            updateFuncManager.PlayMoveSe(cancellationTokenSource.Token).Forget();
+            elapsedTime = 0;
         }
 
         public void MyUpdate()
         {
-            //入力方向に合わせてSpriteの向きを変更(MovingStateと逆になってるので注意！)
+            //入力方向に合わせてSpriteの向きを変更
             switch (PuzzleActionSceneInputController.Instance.MoveAxisKey.x)
             {
                 case > 0:
@@ -53,7 +66,6 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerComponent.AnimationManager.ChangeSpriteFlipX(false);
                     break;
             }
-            
 
             //下に地面がなければDivingFallStateに変更
             var onGround = updateFuncManager.CheckOnGround();
@@ -62,18 +74,23 @@ namespace TettekeKobo.GhostDivePuzzle
                 transitionState.TransitionState(PlayerStateType.TVDivingFall);
                 return;
             }
-            
-            //移動させる、Rigidbodyで移動させると隙間が通れなくなるので注意
-            playerComponent.transform.position +=
-                new Vector3(PuzzleActionSceneInputController.Instance.MoveAxisKey.x, 0, 0).normalized * (playerComponent.MoveSpeed / 2 * Time.deltaTime);
-            
+
             //速度が一定以下ならDiveIdleStateに移行する
             if (PuzzleActionSceneInputController.Instance.MoveAxisKey.magnitude < 0.1f)
             {
                 transitionState.TransitionState(PlayerStateType.TVDivingIdle);
+                return;
             }
+            
+            //入力があればジャンプさせる
+            if(PuzzleActionSceneInputController.Instance.JumpKey)
+            {
+                transitionState.TransitionState(PlayerStateType.TVDivingJumpUp);
+                return;
+            }
+            
             //入力があればダイブを解除する
-            else if(PuzzleActionSceneInputController.Instance.StopDiveKey)
+            if(PuzzleActionSceneInputController.Instance.StopDiveKey)
             {
                 transitionState.TransitionState(PlayerStateType.Idle);
                 exitFuncManager.StopDiving(
@@ -82,27 +99,30 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerComponent.TVObject.TVObjectComponentController.ObjectLayer);
             }
             
-            if (PuzzleActionSceneInputController.Instance.ActionDiveAbility)
-            {
-                //通電させる
-                var onLight = playerComponent.TVObject.TVObjectComponentController.IsLighting;
-                playerComponent.TVObject.TVObjectComponentController.TurnOnTVLight(!onLight);
-            }
+            //加速に使う経過時間を加算
+            if (elapsedTime <= 1) elapsedTime += Time.deltaTime * 1.5f;
+            else elapsedTime = 1;
         }
 
         public void MyFixedUpdate()
         {
-
+            //移動させる
+            updateFuncManager.MovePlayer(playerComponent.MoveSpeed * elapsedTime,1.5f);
         }
 
         public void Exit()
         {
-            
+            cancellationTokenSource.Cancel();
         }
         
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource?.Dispose();
         }
     }
 }

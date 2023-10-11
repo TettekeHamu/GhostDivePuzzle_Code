@@ -19,9 +19,9 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly PlayerComponentController playerComponent;
         /// <summary>
-        /// ダイブ時の機能をまとめたクラス
+        /// 
         /// </summary>
-        private readonly PlayerDiveEnterFuncManager playerDiveEnterFuncManager;
+        private readonly PlayerDiveUpdateFuncManager updateFuncManager;
         /// <summary>
         /// キャンセル用のトークンソース
         /// </summary>
@@ -34,19 +34,19 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
-            playerDiveEnterFuncManager = new PlayerDiveEnterFuncManager(ts, pcc);
+            updateFuncManager = new PlayerDiveUpdateFuncManager(ts, pcc);
             cancellationTokenSource = new CancellationTokenSource();
         }
 
         public void Enter()
         {
-            AsyncStopFalling(cancellationTokenSource.Token).Forget();
+            AsyncStartFalling(cancellationTokenSource.Token).Forget();
         }
 
         public void MyUpdate()
         {
-            //var onGround = playerDiveEnterFuncManager.CheckOnGround();
-            //if (onGround) transitionState.TransitionState(PlayerStateType.TVDivingLand);
+            var onGround = updateFuncManager.CheckOnGround();
+            if (onGround) transitionState.TransitionState(PlayerStateType.TVDivingLand);
         }
 
         public void MyFixedUpdate()
@@ -62,23 +62,23 @@ namespace TettekeKobo.GhostDivePuzzle
         /// <summary>
         /// 落下を開始させる処理
         /// </summary>
-        private async UniTaskVoid AsyncStopFalling(CancellationToken token)
+        private async UniTaskVoid AsyncStartFalling(CancellationToken token)
         {
             //ここで重力をかけることでバグを起こさないようにする
             playerComponent.Rigidbody2D.velocity = Vector2.down;
             
             //少しだけ待つ（ここで待たないとダイブ時にFallingStateに移行してしまうバグが起きる）
-            await UniTask.DelayFrame(5, cancellationToken: token);
+            await UniTask.DelayFrame(3, cancellationToken: token);
             
             //接地判定
-            //var onGround = playerDiveEnterFuncManager.CheckOnGround();
-            //if (onGround)
+            var onGround = updateFuncManager.CheckOnGround();
+            if (onGround)
             {
                 playerComponent.Rigidbody2D.velocity = Vector2.zero;
                 //Stateを変更
                 transitionState.TransitionState(PlayerStateType.TVDivingIdle);
             }
-            //else
+            else
             {
                 //落下させる
                 playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsTVFalling, true);

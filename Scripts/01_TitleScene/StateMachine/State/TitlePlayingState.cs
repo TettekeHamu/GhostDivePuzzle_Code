@@ -1,5 +1,5 @@
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
-using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
 {
@@ -25,6 +25,7 @@ namespace TettekeKobo.GhostDivePuzzle
         public void Enter()
         {
             //Debug.Log("ゲームプレイ中です");
+            BgmPlayer.Instance.Play("BGM_Title");
         }
 
         public void MyUpdate()
@@ -39,6 +40,7 @@ namespace TettekeKobo.GhostDivePuzzle
             //シーンを移動
             if (TitleSceneInputController.Instance.CanChangeScene)
             {
+                SePlayer.Instance.Play("SE_Decide");
                 transitionState.TransitionState(TitleSceneModeType.SceneLoading);
             }
         }

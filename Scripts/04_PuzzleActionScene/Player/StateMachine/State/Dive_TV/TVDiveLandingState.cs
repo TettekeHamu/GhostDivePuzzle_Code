@@ -10,7 +10,7 @@ namespace TettekeKobo.GhostDivePuzzle
     /// </summary>
     public class TVDiveLandingState : IHamuState,ICollisionEnemy
     {
-                /// <summary>
+        /// <summary>
         /// Stateを変更させる処理を持つインタフェース
         /// </summary>
         private readonly ITransitionState<PlayerStateType> transitionState;
@@ -18,6 +18,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーのコンポーネントをまとめたクラス
         /// </summary>
         private readonly PlayerComponentController playerComponent;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly PlayerDiveFallingFuncManager fallingFuncManager;
         /// <summary>
         /// キャンセル用のトークンソース
         /// </summary>
@@ -30,12 +34,13 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
+            fallingFuncManager = new PlayerDiveFallingFuncManager(ts, pcc);
             cancellationTokenSource = new CancellationTokenSource();
         }
         
         public void Enter()
         {
-            AsyncStopFalling(cancellationTokenSource.Token).Forget();
+            fallingFuncManager.StopFalling(PlayerDiveType.DiveTV, cancellationTokenSource.Token);
         }
 
         public void MyUpdate()
@@ -50,19 +55,9 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void Exit()
         {
-            
+
         }
 
-        private async UniTaskVoid AsyncStopFalling(CancellationToken token)
-        {
-            //Animatorを変更
-            playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsTVFalling,false);
-            //少し待つ(落下位置を調整するため)
-            await UniTask.Delay(TimeSpan.FromSeconds(0.1f), cancellationToken: token);
-            //Stateを変更
-            transitionState.TransitionState(PlayerStateType.TVDivingIdle);
-        }
-        
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);

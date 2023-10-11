@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TettekeKobo.GhostDivePuzzle
 {
     /// <summary>
-    /// 
+    /// FanPlayerDivingState
     /// </summary>
     public class FanPlayerDivingState : IHamuState
     {
@@ -13,25 +13,24 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<FanStateType> transitionState;
         /// <summary>
-        /// TVオブジェクトのコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly FanObjectComponentController fanObjectComponent;
+        private readonly FanObjectComponentController componentController;
         
-        /// <summary>
-        /// コンストラクター
-        /// </summary>
         public FanPlayerDivingState(ITransitionState<FanStateType> ts, FanObjectComponentController focc)
         {
             transitionState = ts;
-            fanObjectComponent = focc;
+            componentController = focc;
         }
         
         public void Enter()
         {
             //動かす必要がない & 当たり判定をなくす
-            fanObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            fanObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
-            fanObjectComponent.BoxCollider2D.enabled = false;
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+            componentController.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            componentController.BoxCollider2D.enabled = false;
+            //Spriteを非表示に
+            componentController.SpriteRenderer.enabled = false;
         }
 
         public void MyUpdate()
@@ -46,7 +45,9 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void Exit()
         {
-            fanObjectComponent.BoxCollider2D.enabled = true;
+            componentController.BoxCollider2D.enabled = true;
+            //Spriteを表示させる
+            componentController.SpriteRenderer.enabled = true;
         }
     }
 }

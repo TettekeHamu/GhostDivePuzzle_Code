@@ -29,6 +29,9 @@ namespace TettekeKobo.GhostDivePuzzle
             tombObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
             tombObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
             tombObjectComponent.BoxCollider2D.enabled = false;
+            tombObjectComponent.CircleCollider2D.enabled = false;
+            //画像を非表示に
+            tombObjectComponent.SpriteRenderer.enabled = false;
         }
 
         public void MyUpdate()
@@ -44,6 +47,8 @@ namespace TettekeKobo.GhostDivePuzzle
         public void Exit()
         {
             tombObjectComponent.BoxCollider2D.enabled = true;
+            tombObjectComponent.CircleCollider2D.enabled = true;
+            tombObjectComponent.SpriteRenderer.enabled = true;
         }
     }
 }

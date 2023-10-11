@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TettekeKobo.StateMachine;
 using UniRx;
 using UnityEngine;
@@ -7,7 +10,7 @@ namespace TettekeKobo.GhostDivePuzzle
     /// <summary>
     /// 待機中のState
     /// </summary>
-    public class IdlingState : IHamuState,IDiveable,ICollisionEnemy,IStartDiveable
+    public class IdlingState : IHamuState,IDiveable,ICollisionEnemy,IStartDiveable,IDisposable
     {
         /// <summary>
         /// Stateを変更させる処理を持つインタフェース
@@ -17,6 +20,14 @@ namespace TettekeKobo.GhostDivePuzzle
         /// プレイヤーのコンポーネントをまとめたクラス
         /// </summary>
         private readonly PlayerComponentController playerComponent;
+        /// <summary>
+        /// ダイブ終了時と同時にダイブさせないように少しだけ待つ用のbool値
+        /// </summary>
+        private bool isCanDiving;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
         /// コンストラクター
@@ -25,10 +36,14 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
+            cancellationTokenSource = new CancellationTokenSource();
         }
         
         public void Enter()
         {
+            playerComponent.ChangeCanDestroyEnemy(false);
+            isCanDiving = false;
+            AsyncStartIdling(cancellationTokenSource.Token).Forget();
             //重力を無効化する
             playerComponent.Rigidbody2D.gravityScale = 0;
             //移動をとめる
@@ -41,10 +56,14 @@ namespace TettekeKobo.GhostDivePuzzle
             playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsOffering,false);
             playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsTVDiving,false);
             playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsFanDiving,false);
+            playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsRefrigeratorDiving,false);
+            playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsMicrowaveDiving,false);
         }
 
         public void MyUpdate()
         {
+            if(!isCanDiving) return;
+            
             //ライフゲージを減らす
             var isDead = playerComponent.ReduceLife(Time.deltaTime);
             if (isDead)
@@ -70,8 +89,16 @@ namespace TettekeKobo.GhostDivePuzzle
             
         }
 
+        private async UniTaskVoid AsyncStartIdling(CancellationToken token)
+        {
+            //ダイブ終了時と同時にダイブさせないように少しだけ待つ処理
+            await UniTask.DelayFrame(6, cancellationToken: token);
+            isCanDiving = true;
+        }
+
         bool IDiveable.GetCanDive()
         {
+            if (!isCanDiving) return false;
             return PuzzleActionSceneInputController.Instance.StartDiveKey;
         }
 
@@ -90,9 +117,24 @@ namespace TettekeKobo.GhostDivePuzzle
             transitionState.TransitionState(PlayerStateType.FanDivingStart);
         }
 
+        void IStartDiveable.StartRefrigeratorDive()
+        {
+            transitionState.TransitionState(PlayerStateType.RefrigeratorDivingStart);
+        }
+        
+        void IStartDiveable.StartMicrowaveDive()
+        {
+            transitionState.TransitionState(PlayerStateType.MicrowaveDivingStart);
+        }
+
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource?.Dispose();
         }
     }
 }

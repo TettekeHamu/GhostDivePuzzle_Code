@@ -23,6 +23,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         [SerializeField] private GameObject pausePanel;
         /// <summary>
+        /// 画面右上に出すステージ名のText
+        /// </summary>
+        [SerializeField] private Text stageNameText;
+        /// <summary>
         /// textのPrefab
         /// </summary>
         [SerializeField] private Text textPrefab;
@@ -34,6 +38,7 @@ namespace TettekeKobo.GhostDivePuzzle
         private void Awake()
         {
             pausePanel.SetActive(false);
+            stageNameText.text = "";
         }
 
         /// <summary>
@@ -50,7 +55,41 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public async UniTask ShowStageNameCoroutine(CancellationToken token)
         {
-            var stageName = "なんかいい感じのステージ名";
+            var stageName = "";
+
+            if (PlayStageNumberManager.Instance == null)
+            {
+                Debug.Log("シーン数が不明です");
+                return;
+            }
+            
+            switch (PlayStageNumberManager.Instance.LoadStageNumber())
+            {
+                case 0:
+                    stageName = "封木山麓";
+                    break;
+                case 1:
+                    stageName = "封木山山腰";
+                    break;
+                case 2:
+                    stageName = "封木山中腹";
+                    break;
+                case 3:
+                    stageName = "封木山山頂付近";
+                    break;
+                case 4:
+                    stageName = "湯楽神社への道";
+                    break;
+                case 5:
+                    stageName = "湯楽神社入口";
+                    break;
+                default:
+                    stageName = "ステージ名が不明です";
+                    break;
+            }
+
+            stageNameText.text = stageName;
+            
             var textList = new List<Text>();
             await UniTask.Delay((TimeSpan.FromSeconds(0.1f)), cancellationToken: token);
             foreach (var sn in stageName)

@@ -1,3 +1,4 @@
+using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace TettekeKobo.GhostDivePuzzle
         
         public void Enter()
         {
-            //Debug.Log("シーンロード開始！");
+            BgmPlayer.Instance.Stop();
             SceneLoadManager.Instance.LoadNextScene("StageSelectScene");
         }
 

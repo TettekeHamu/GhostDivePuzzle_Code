@@ -19,6 +19,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private PlayerDiveType playerDiveType;
         /// <summary>
+        /// プレイヤーが死んだらtrueになるbool値
+        /// </summary>
+        private bool isDeadPlayer;
+        /// <summary>
         /// プレイヤーがダイブしているかどうか
         /// </summary>
         private bool isDiving;
@@ -68,11 +72,7 @@ namespace TettekeKobo.GhostDivePuzzle
         /// ダイブ中にジャンプで落下してる際のState
         /// </summary>
         private readonly DiveJumpingDownState diveJumpingDownState;
-        /// <summary>
-        /// 最高到達地点で少し待機させるState
-        /// </summary>
-        private readonly DiveJumpingStayState diveJumpingStayState;
-        
+
         /// TV関連
         /// <summary>
         /// TVにダイブを始めた時のState
@@ -94,6 +94,14 @@ namespace TettekeKobo.GhostDivePuzzle
         /// TVにダイブ中 & 着地した際のState
         /// </summary>
         private readonly TVDiveLandingState tvDiveLandingState;
+        /// <summary>
+        /// TVにダイブ中 & ジャンプで上昇中のState
+        /// </summary>
+        private readonly TVDiveJumpingUpState tvDiveJumpingUpState;
+        /// <summary>
+        /// TVにダイブ中 & ジャンプで下降中のState
+        /// </summary>
+        private readonly TVDiveJumpingDownState tvDiveJumpingDownState;
 
         /// 扇風機関連
         /// <summary>
@@ -109,6 +117,14 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly FanDiveMovingState fanDiveMovingState;
         /// <summary>
+        /// 扇風機にダイブ中 & 落下中のState
+        /// </summary>
+        private readonly FanDiveFallingState fanDiveFallingState;
+        /// <summary>
+        /// 扇風機にダイブ中 & 着地した際のState
+        /// </summary>
+        private readonly FanDiveLandingState fanDiveLandingState;
+        /// <summary>
         /// 扇風機にダイブ中 & ジャンプ（上昇中）のState
         /// </summary>
         private readonly FanDiveJumpingUpState fanDiveJumpingUpState;
@@ -116,15 +132,66 @@ namespace TettekeKobo.GhostDivePuzzle
         /// 扇風機にダイブ中 & ジャンプ（落下中）のState
         /// </summary>
         private readonly FanDiveJumpingDownState fanDiveJumpingDownState;
-        /// <summary>
-        /// 扇風機にダイブ中 & ジャンプ（最高地点）のState
-        /// </summary>
-        private readonly FanDiveJumpingIdleState fanDiveJumpingIdleState;
 
+        /// 冷蔵庫関連
         /// <summary>
-        /// 扇風機にダイブ中 & 着地した際のState
+        /// 冷蔵庫にダイブを始めた時のState
         /// </summary>
-        private readonly FanDiveLandingState fanDiveLandingState;
+        private readonly RefrigeratorDiveStartingState refrigeratorDiveStartingState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & 待機中のState
+        /// </summary>
+        private readonly RefrigeratorDiveIdlingState refrigeratorDiveIdlingState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & 移動中のState
+        /// </summary>
+        private readonly RefrigeratorDiveMovingState refrigeratorDiveMovingState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & 落下中のState
+        /// </summary>
+        private readonly RefrigeratorDiveFallingState refrigeratorDiveFallingState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & 着地した際のState
+        /// </summary>
+        private readonly RefrigeratorDiveLandingState refrigeratorDiveLandingState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & ジャンプで上昇中のState
+        /// </summary>
+        private readonly RefrigeratorDiveJumpingUpState refrigeratorDiveJumpingUpState;
+        /// <summary>
+        /// 冷蔵庫にダイブ中 & ジャンプで下降中のState
+        /// </summary>
+        private readonly RefrigeratorDiveJumpingDownState refrigeratorDiveJumpingDownState;
+
+        /// 電子レンジ関連
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveStartingState microwaveDiveStartingState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveIdlingState microwaveDiveIdlingState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveMovingState microwaveDiveMovingState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveFallingState microwaveDiveFallingState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveLandingState microwaveDiveLandingState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveJumpingUpState microwaveDiveJumpingUpState;
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly MicrowaveDiveJumpingDownState microwaveDiveJumpingDownState;
         /// <summary>
         /// Stateが変更した時に発行をおこなうSubject
         /// </summary>
@@ -140,6 +207,10 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public PlayerDiveType PlayerDiveType => playerDiveType;
         /// <summary>
+        /// 
+        /// </summary>
+        public bool IsDeadPlayer => isDeadPlayer;
+        /// <summary>
         /// ダイブしていたらtrueを返すgetter
         /// </summary>
         public bool IsDiving => isDiving;
@@ -149,6 +220,8 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public PlayerStateMachine(PlayerComponentController pcc)
         {
+            isDeadPlayer = false;
+            
             idlingState = new IdlingState(this, pcc);
             movingState = new MovingState(this, pcc);
             deadState = new DeadState(this, pcc);
@@ -161,21 +234,38 @@ namespace TettekeKobo.GhostDivePuzzle
             diveOfferingState = new DiveOfferingState(this, pcc);
             diveJumpingUpState = new DiveJumpingUpState(this, pcc);
             diveJumpingDownState = new DiveJumpingDownState(this, pcc);
-            diveJumpingStayState = new DiveJumpingStayState(this, pcc);
-            
+
             tvDiveStartingState = new TVDiveStartingState(this,pcc);
             tvDiveIdlingState = new TVDiveIdlingState(this, pcc);
             tvDiveMovingState = new TVDiveMovingState(this, pcc);
             tvDiveFallingState = new TVDiveFallingState(this, pcc);
             tvDiveLandingState = new TVDiveLandingState(this, pcc);
+            tvDiveJumpingUpState = new TVDiveJumpingUpState(this, pcc);
+            tvDiveJumpingDownState = new TVDiveJumpingDownState(this, pcc);
 
             fanDiveStartingState = new FanDiveStartingState(this, pcc);
             fanDiveIdlingState = new FanDiveIdlingState(this, pcc);
             fanDiveMovingState = new FanDiveMovingState(this, pcc);
+            fanDiveFallingState = new FanDiveFallingState(this, pcc);
+            fanDiveLandingState = new FanDiveLandingState(this, pcc);
             fanDiveJumpingUpState = new FanDiveJumpingUpState(this, pcc);
             fanDiveJumpingDownState = new FanDiveJumpingDownState(this, pcc);
-            fanDiveJumpingIdleState = new FanDiveJumpingIdleState(this, pcc);
-            fanDiveLandingState = new FanDiveLandingState(this, pcc);
+
+            refrigeratorDiveStartingState = new RefrigeratorDiveStartingState(this, pcc);
+            refrigeratorDiveIdlingState = new RefrigeratorDiveIdlingState(this, pcc);
+            refrigeratorDiveMovingState = new RefrigeratorDiveMovingState(this, pcc);
+            refrigeratorDiveFallingState = new RefrigeratorDiveFallingState(this, pcc);
+            refrigeratorDiveLandingState = new RefrigeratorDiveLandingState(this, pcc);
+            refrigeratorDiveJumpingUpState = new RefrigeratorDiveJumpingUpState(this, pcc);
+            refrigeratorDiveJumpingDownState = new RefrigeratorDiveJumpingDownState(this, pcc);
+
+            microwaveDiveStartingState = new MicrowaveDiveStartingState(this, pcc);
+            microwaveDiveIdlingState = new MicrowaveDiveIdlingState(this, pcc);
+            microwaveDiveMovingState = new MicrowaveDiveMovingState(this, pcc);
+            microwaveDiveFallingState = new MicrowaveDiveFallingState(this, pcc);
+            microwaveDiveLandingState = new MicrowaveDiveLandingState(this, pcc);
+            microwaveDiveJumpingUpState = new MicrowaveDiveJumpingUpState(this, pcc);
+            microwaveDiveJumpingDownState = new MicrowaveDiveJumpingDownState(this, pcc);
         }
         
         protected override IHamuState GetStateFromEnum(PlayerStateType stateType)
@@ -198,6 +288,7 @@ namespace TettekeKobo.GhostDivePuzzle
                 case PlayerStateType.Dead:
                     playerDiveType = PlayerDiveType.NotDive;
                     isDiving = false;
+                    isDeadPlayer = true;
                     return deadState;
                 //オハカにダイブ
                 case PlayerStateType.DivingStart:
@@ -232,10 +323,6 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerDiveType = PlayerDiveType.DiveTomb;
                     isDiving = true;
                     return diveJumpingDownState;
-                case PlayerStateType.DiveJumpStay:
-                    playerDiveType = PlayerDiveType.DiveTomb;
-                    isDiving = true;
-                    return diveJumpingStayState;
                 //TVにダイブ
                 case PlayerStateType.TVDivingStart:
                     playerDiveType = PlayerDiveType.DiveTV;
@@ -257,6 +344,14 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerDiveType = PlayerDiveType.DiveTV;
                     isDiving = true;
                     return tvDiveLandingState;
+                case PlayerStateType.TVDivingJumpUp:
+                    playerDiveType = PlayerDiveType.DiveTV;
+                    isDiving = true;
+                    return tvDiveJumpingUpState;
+                case PlayerStateType.TVDivingJumpDown:
+                    playerDiveType = PlayerDiveType.DiveTV;
+                    isDiving = true;
+                    return tvDiveJumpingDownState;
                 //扇風機にダイブ
                 case PlayerStateType.FanDivingStart:
                     playerDiveType = PlayerDiveType.DiveFan;
@@ -270,6 +365,14 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerDiveType = PlayerDiveType.DiveFan;
                     isDiving = true;
                     return fanDiveMovingState;
+                case PlayerStateType.FanDivingFall:
+                    playerDiveType = PlayerDiveType.DiveFan;
+                    isDiving = true;
+                    return fanDiveFallingState;
+                case PlayerStateType.FanDivingLand:
+                    playerDiveType = PlayerDiveType.DiveFan;
+                    isDiving = true;
+                    return fanDiveLandingState;
                 case PlayerStateType.FanDivingJumpUp:
                     playerDiveType = PlayerDiveType.DiveFan;
                     isDiving = true;
@@ -278,14 +381,64 @@ namespace TettekeKobo.GhostDivePuzzle
                     playerDiveType = PlayerDiveType.DiveFan;
                     isDiving = true;
                     return fanDiveJumpingDownState;
-                case PlayerStateType.FanDivingJumpIdle:
-                    playerDiveType = PlayerDiveType.DiveFan;
+                // 冷蔵庫にダイブ
+                case PlayerStateType.RefrigeratorDivingStart:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
                     isDiving = true;
-                    return fanDiveJumpingIdleState;
-                case PlayerStateType.FanDivingLand:
-                    playerDiveType = PlayerDiveType.DiveFan;
+                    return refrigeratorDiveStartingState;
+                case PlayerStateType.RefrigeratorDivingIdle:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
                     isDiving = true;
-                    return fanDiveLandingState;
+                    return refrigeratorDiveIdlingState;
+                case PlayerStateType.RefrigeratorDivingMove:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
+                    isDiving = true;
+                    return refrigeratorDiveMovingState;
+                case PlayerStateType.RefrigeratorDivingFall:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
+                    isDiving = true;
+                    return refrigeratorDiveFallingState;
+                case PlayerStateType.RefrigeratorDivingLand:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
+                    isDiving = true;
+                    return refrigeratorDiveLandingState;
+                case PlayerStateType.RefrigeratorDivingJumpUp:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
+                    isDiving = true;
+                    return refrigeratorDiveJumpingUpState;
+                case PlayerStateType.RefrigeratorDivingJumpDown:
+                    playerDiveType = PlayerDiveType.DiveRefrigerator;
+                    isDiving = true;
+                    return refrigeratorDiveJumpingDownState;
+                // 電子レンジにダイブ
+                case PlayerStateType.MicrowaveDivingStart:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveStartingState;
+                case PlayerStateType.MicrowaveDivingIdle:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveIdlingState;
+                case PlayerStateType.MicrowaveDivingMove:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveMovingState;
+                case PlayerStateType.MicrowaveDivingFall:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveFallingState;
+                case PlayerStateType.MicrowaveDivingLand:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveLandingState;
+                case PlayerStateType.MicrowaveDivingJumpUp:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveJumpingUpState;
+                case PlayerStateType.MicrowaveDivingJumpDown:
+                    playerDiveType = PlayerDiveType.DiveMicrowave;
+                    isDiving = true;
+                    return microwaveDiveJumpingDownState;
                 //その他
                 case PlayerStateType.None:
                     Debug.LogWarning("存在しないStateが渡されました");
@@ -317,6 +470,12 @@ namespace TettekeKobo.GhostDivePuzzle
                 case PlayerDiveType.DiveFan:
                     transitionState.TransitionState(PlayerStateType.FanDivingIdle);
                     break;
+                case PlayerDiveType.DiveRefrigerator:
+                    transitionState.TransitionState(PlayerStateType.RefrigeratorDivingIdle);
+                    break;
+                case PlayerDiveType.DiveMicrowave:
+                    transitionState.TransitionState(PlayerStateType.MicrowaveDivingIdle);
+                    break;
                 case PlayerDiveType.Non:
                     Debug.LogWarning("存在しないStateが渡されました");
                     break;
@@ -331,18 +490,34 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         public void Dispose()
         {
+            idlingState?.Dispose();
+            movingState?.Dispose();
+            deadState?.Dispose();
+            
             diveStartingState?.Dispose();
+            diveMovingState?.Dispose();
             diveFallingState?.Dispose();
             diveLandingState?.Dispose();
-            diveJumpingStayState?.Dispose();
-            
+
             tvDiveStartingState?.Dispose();
+            tvDiveMovingState?.Dispose();
             tvDiveFallingState?.Dispose();
             tvDiveLandingState?.Dispose();
-            
+
             fanDiveStartingState?.Dispose();
-            fanDiveJumpingIdleState?.Dispose();
+            fanDiveMovingState?.Dispose();
+            fanDiveFallingState?.Dispose();
             fanDiveLandingState?.Dispose();
+
+            refrigeratorDiveStartingState?.Dispose();
+            refrigeratorDiveMovingState?.Dispose();
+            refrigeratorDiveFallingState?.Dispose();
+            refrigeratorDiveLandingState?.Dispose();
+            
+            microwaveDiveStartingState?.Dispose();
+            microwaveDiveMovingState?.Dispose();
+            microwaveDiveFallingState?.Dispose();
+            microwaveDiveLandingState?.Dispose();
             
             onChangeStateSubject?.Dispose();
         }

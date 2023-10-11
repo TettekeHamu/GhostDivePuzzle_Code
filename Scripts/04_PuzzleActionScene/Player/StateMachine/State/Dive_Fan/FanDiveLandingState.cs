@@ -7,7 +7,7 @@ using UnityEngine;
 namespace TettekeKobo.GhostDivePuzzle
 {
     /// <summary>
-    /// 着地した際のState
+    /// 扇風機にダイブ時、着地した際のState
     /// </summary>
     public class FanDiveLandingState : IHamuState,ICollisionEnemy,IDisposable
     {
@@ -20,9 +20,9 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly PlayerComponentController playerComponent;
         /// <summary>
-        /// ダイブ時の機能をまとめたクラス
+        /// 
         /// </summary>
-        private readonly PlayerDiveEnterFuncManager playerDiveEnterFuncManager;
+        private readonly PlayerDiveFallingFuncManager fallingFuncManager;
         /// <summary>
         /// キャンセル用のトークンソース
         /// </summary>
@@ -35,13 +35,13 @@ namespace TettekeKobo.GhostDivePuzzle
         {
             transitionState = ts;
             playerComponent = pcc;
-            playerDiveEnterFuncManager = new PlayerDiveEnterFuncManager(ts, pcc);
+            fallingFuncManager = new PlayerDiveFallingFuncManager(ts, pcc);
             cancellationTokenSource = new CancellationTokenSource();
         }
         
         public void Enter()
         {
-            AsyncStopFalling(cancellationTokenSource.Token).Forget();
+            fallingFuncManager.StopFalling(PlayerDiveType.DiveFan, cancellationTokenSource.Token);
         }
 
         public void MyUpdate()
@@ -56,19 +56,9 @@ namespace TettekeKobo.GhostDivePuzzle
 
         public void Exit()
         {
-            
+
         }
 
-        private async UniTaskVoid AsyncStopFalling(CancellationToken token)
-        {
-            //Animatorを変更
-            playerComponent.AnimationManager.PlayerAnimator.SetBool(playerComponent.AnimationManager.IsFalling,false);
-            //少し待つ(落下位置を調整するため)
-            await UniTask.Delay(TimeSpan.FromSeconds(0.1f), cancellationToken: token);
-            //Stateを変更
-            transitionState.TransitionState(PlayerStateType.FanDivingIdle);
-        }
-        
         public void CollisionEnemy()
         {
             transitionState.TransitionState(PlayerStateType.Dead);

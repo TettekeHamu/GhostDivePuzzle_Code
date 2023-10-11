@@ -14,67 +14,48 @@ namespace TettekeKobo.GhostDivePuzzle
         /// </summary>
         private readonly ITransitionState<TVStateType> transitionState;
         /// <summary>
-        /// TVオブジェクトのコンポーネントをまとめたクラス
+        /// オハカのコンポーネントをまとめたクラス
         /// </summary>
-        private readonly TVObjectComponentController tvObjectComponent;
-        
+        private readonly TVObjectComponentController componentController;
+
         /// <summary>
         /// コンストラクター
         /// </summary>
-        public TVNotDivedIdlingState(ITransitionState<TVStateType> ts, TVObjectComponentController tvocc)
+        public TVNotDivedIdlingState(ITransitionState<TVStateType> ts, TVObjectComponentController tocc)
         {
             transitionState = ts;
-            tvObjectComponent = tvocc;
+            componentController = tocc;
         }
         
         public void Enter()
         {
-            //動かす必要がないのでKinematic & 全て固定させる
-            tvObjectComponent.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-            tvObjectComponent.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
+            //基本動かさないのでDynamic&FreezeAllにしておく
+            //重力は効かせたいのでDynamicにしておく
+            componentController.Rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+            componentController.Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         }
 
         public void MyUpdate()
         {
-            var resultCenter = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(tvObjectComponent.BoxCollider2D);
-            //下にプレイヤーがいないかチェックする
-            var hitPlayer = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -tvObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, tvObjectComponent.PlayerLayer);
+            //真下にプレイヤーがいるかチェック
+            var result = BoxCollider2DPositionCalculator.GetBoxCollider2DCenter(componentController.BoxCollider2D);
+            var length = -1 * componentController.transform.lossyScale.y / 2;
+            var hitPlayer = VisualPhysics2D.Raycast(result + new Vector2(0, length) + new Vector2(0, -0.01f), Vector2.down, 0.9f, componentController.PlayerLayer);
             if (hitPlayer)
             {
+                //ダイブしてたら追従させる
                 var playerStateBehaviour = Object.FindObjectOfType<PlayerStateBehaviour>();
-                //ダイブしていなかったらリターン
                 if(!playerStateBehaviour.PlayerStateMachine.IsDiving) return;
                 transitionState.TransitionState(TVStateType.NonDivedOnPlayerStaying);
                 return;
             }
-
-            //下に地面やオブジェクトがないかチェックする
-            var resultVertices = BoxCollider2DPositionCalculator.GetBoxCollide2DVertices(tvObjectComponent.BoxCollider2D);
-            var leftHitGround = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.GroundLayer);
-            var leftHitObject = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.ObjectLayer);
-            var leftHitPlayer = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.PlayerLayer);
-            var rightHitGround = VisualPhysics2D.Raycast(resultVertices[2] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.GroundLayer);
-            var rightHitObject = VisualPhysics2D.Raycast(resultVertices[2] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.ObjectLayer);
-            var rightHitPlayer = VisualPhysics2D.Raycast(resultVertices[3] + new Vector2(0,-0.01f), 
-                Vector2.down, 0.9f, tvObjectComponent.PlayerLayer);
-            var centerHitGround = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -tvObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, tvObjectComponent.GroundLayer);
-            var centerHitObject = VisualPhysics2D.Raycast(resultCenter + new Vector2(0, -tvObjectComponent.transform.lossyScale.y / 2) + new Vector2(0, -0.01f),
-                Vector2.down, 0.9f, tvObjectComponent.ObjectLayer);
-            if (leftHitGround || leftHitObject ||  leftHitPlayer || rightHitGround || rightHitObject || rightHitPlayer ||centerHitGround || centerHitObject)
-            {
-                //設定中は何もしない
-            }
-            else
-            {
-                transitionState.TransitionState(TVStateType.NonDivedFalling);
-            }
+            
+            //下にオブジェクトや地面がなければ落下させる
+            var onGround = componentController.Rigidbody2D.IsTouching(componentController.GroundContactFilter2D);
+            var onObject = componentController.Rigidbody2D.IsTouching(componentController.ObjectContactFilter2D);
+            var onPlayer = componentController.Rigidbody2D.IsTouching(componentController.PlayerContactFilter2D);
+            if(!onGround && !onObject && !onPlayer) transitionState.TransitionState(TVStateType.NonDivedFalling);
+            
         }
 
         public void MyFixedUpdate()
