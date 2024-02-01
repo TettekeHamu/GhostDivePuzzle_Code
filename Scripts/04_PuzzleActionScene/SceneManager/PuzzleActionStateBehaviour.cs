@@ -37,7 +37,7 @@ namespace TettekeKobo.GhostDivePuzzle
         private void Start()
         {
             #if UNITY_EDITOR
-                Debug.Log("デバッグ開始！");
+                //Debug.Log("デバッグ開始！");
                 //SetUpScene();
             #else
                 //ここはなにもしない

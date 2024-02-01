@@ -1,5 +1,6 @@
 using naichilab.EasySoundPlayer.Scripts;
 using TettekeKobo.StateMachine;
+using UnityEngine;
 
 namespace TettekeKobo.GhostDivePuzzle
 {
@@ -25,6 +26,7 @@ namespace TettekeKobo.GhostDivePuzzle
         public void Enter()
         {
             //Debug.Log("ゲームプレイ中です");
+            BgmPlayer.Instance.Stop();
             BgmPlayer.Instance.Play("BGM_Title");
         }
 

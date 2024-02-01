@@ -1,3 +1,4 @@
+using TettekeKobo.GhostDivePuzzle.Refactoring;
 using UniRx;
 using UnityEngine;
 
@@ -127,6 +128,21 @@ namespace TettekeKobo.GhostDivePuzzle
         private void OnDestroy()
         {
             playerStateMachine?.Dispose();
+        }
+        
+        public void SetTombObject(TombObjectBehaviour tomb)
+        {
+            
+        }
+
+        public void SetMicrowaveObject(MicrowaveObjectBehaviour microwave)
+        {
+            
+        }
+
+        public void SetRefrigeratorObject(RefrigeratorObjectBehaviour refrigerator)
+        {
+            
         }
     }
 }
